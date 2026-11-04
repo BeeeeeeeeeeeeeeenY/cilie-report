@@ -1,0 +1,667 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>词猎 Demo 方案汇报</title>
+<style>
+:root{
+  --bg:#f7f6f2;--surface:#ffffff;--ink:#1c1b19;--ink-2:#4a4844;--ink-3:#7a776f;--line:#e2dfd7;
+  --accent:#1f6f5f;--accent-soft:#dff0ea;
+  --red:#c8463c;--yellow:#d9a22a;--green:#2f8f5b;
+  --red-soft:#fae3e0;--yellow-soft:#fbefd0;--green-soft:#dcefe3;
+  --eink:#e9e8e2;--eink-ink:#2a2a2a;
+  --c1:#1f6f5f;--c2:#b4642c;--c3:#5a5fb8;--c4:#8f8a7b;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#15161a;--surface:#1e2026;--ink:#ebe9e3;--ink-2:#c4c1b8;--ink-3:#8f8c84;--line:#31343c;
+    --accent:#5fc2a8;--accent-soft:#1f3a33;
+    --red:#e2695e;--yellow:#e6b84a;--green:#5fbf87;
+    --red-soft:#3a2522;--yellow-soft:#3a3120;--green-soft:#1f3328;
+    --eink:#d9d8d2;--eink-ink:#222;
+    --c1:#5fc2a8;--c2:#e09a5c;--c3:#9ea0ea;--c4:#a7a396;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15161a;--surface:#1e2026;--ink:#ebe9e3;--ink-2:#c4c1b8;--ink-3:#8f8c84;--line:#31343c;
+  --accent:#5fc2a8;--accent-soft:#1f3a33;
+  --red:#e2695e;--yellow:#e6b84a;--green:#5fbf87;
+  --red-soft:#3a2522;--yellow-soft:#3a3120;--green-soft:#1f3328;
+  --eink:#d9d8d2;--eink-ink:#222;
+  --c1:#5fc2a8;--c2:#e09a5c;--c3:#9ea0ea;--c4:#a7a396;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif}
+a{color:var(--accent)}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px 80px}
+header.hero{padding:56px 0 24px;border-bottom:1px solid var(--line)}
+.hero h1{font-size:34px;margin:0 0 6px;letter-spacing:.5px}
+.hero p.sub{margin:0;color:var(--ink-2);font-size:17px}
+.meta{color:var(--ink-3);font-size:13px;margin-top:10px}
+nav.toc{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding:10px 0;margin-bottom:28px;display:flex;gap:6px;flex-wrap:wrap}
+nav.toc a{text-decoration:none;color:var(--ink-2);padding:5px 11px;border-radius:999px;border:1px solid var(--line);font-size:14px;background:var(--surface)}
+nav.toc a:hover{border-color:var(--accent);color:var(--accent)}
+section.part{margin-top:48px}
+.part>h2{font-size:26px;margin:0 0 4px;padding-top:12px}
+.part>h2 small{display:block;font-size:13px;color:var(--ink-3);font-weight:400;letter-spacing:1px}
+h3{font-size:19px;margin:30px 0 10px}
+h4{font-size:16px;margin:20px 0 6px}
+p{margin:8px 0}
+ul,ol{padding-left:22px;margin:8px 0}
+li{margin:3px 0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:14px 0}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.callout{border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 10px 10px 0;margin:14px 0}
+.tag{display:inline-block;font-size:12px;padding:1px 8px;border-radius:999px;border:1px solid var(--line);color:var(--ink-2);margin-right:4px;background:var(--surface)}
+.tag.hi{background:var(--green-soft);color:var(--green);border-color:transparent}
+.tag.mid{background:var(--yellow-soft);color:var(--yellow);border-color:transparent}
+.tag.lo{background:var(--red-soft);color:var(--red);border-color:transparent}
+table{width:100%;border-collapse:collapse;font-size:14px;margin:12px 0;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{background:var(--bg);color:var(--ink-2);font-weight:600;font-size:13px}
+tr:last-child td{border-bottom:none}
+code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px}
+code{background:var(--bg);border:1px solid var(--line);padding:1px 5px;border-radius:5px}
+pre{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow:auto;line-height:1.55}
+pre code{background:none;border:none;padding:0}
+figure{margin:18px 0}
+figure svg{max-width:100%;height:auto;display:block;color:var(--ink)}
+figcaption{font-size:13px;color:var(--ink-3);margin-top:6px}
+.kpi{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin:14px 0}
+.kpi .k{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.kpi .k b{display:block;font-size:24px;color:var(--accent)}
+.kpi .k span{font-size:13px;color:var(--ink-3)}
+/* e-ink device mock */
+.devices{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));margin:16px 0}
+.device{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px}
+.device .title{font-size:13px;color:var(--ink-3);margin-bottom:8px}
+.screen{background:var(--eink);color:var(--eink-ink);border:3px solid #55534c;border-radius:8px;padding:14px 14px 40px;min-height:240px;font-family:"PingFang SC",system-ui,sans-serif;position:relative;box-shadow:inset 0 0 0 2px #cfcdc5}
+.screen .hdr{font-size:11px;letter-spacing:1px;display:flex;justify-content:space-between;border-bottom:1px solid #999;padding-bottom:4px;margin-bottom:8px}
+.screen .big{font-size:26px;font-weight:700;letter-spacing:.5px}
+.screen .ipa{font-size:13px;color:#555}
+.screen .muted{font-size:12px;color:#555}
+.screen .line{font-size:13px;margin:4px 0}
+.screen .bar{height:8px;background:#fff;border:1px solid #777;border-radius:4px;overflow:hidden;margin:6px 0}
+.screen .bar i{display:block;height:100%;background:#333}
+.screen .prompt{position:absolute;bottom:10px;left:14px;right:14px;font-size:11px;color:#555;display:flex;justify-content:space-between}
+.screen .opt{display:block;font-size:12px;padding:3px 6px;border:1px solid #777;border-radius:4px;margin:4px 0;background:#f4f3ee}
+.screen .opt.sel{background:#333;color:#eee}
+.btns{display:flex;gap:10px;justify-content:center;margin-top:12px;align-items:center}
+.btn{width:38px;height:38px;border-radius:50%;border:3px solid #55534c;display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:#fff;font-weight:700}
+.btn.r{background:var(--red)}.btn.y{background:var(--yellow)}.btn.g{background:var(--green)}
+.dpad{width:38px;height:38px;position:relative;margin-left:14px}
+.dpad:before,.dpad:after{content:"";position:absolute;background:#55534c;border-radius:3px}
+.dpad:before{left:13px;top:0;width:12px;height:38px}.dpad:after{top:13px;left:0;width:38px;height:12px}
+.note{font-size:13px;color:var(--ink-2);margin-top:8px}
+/* gantt */
+.gantt{overflow:auto}
+.gantt table{min-width:760px}
+.gantt td.cell{padding:4px 2px;text-align:center;width:52px}
+.gantt .b{height:16px;border-radius:4px;background:var(--c4);opacity:.85}
+.gantt .b.p0{background:var(--c4)}.gantt .b.p1{background:var(--c1)}.gantt .b.p2{background:var(--c2)}.gantt .b.p3{background:var(--c3)}.gantt .b.p4{background:var(--c1)}.gantt .b.p5{background:var(--c2)}
+.gantt .ms{width:14px;height:14px;transform:rotate(45deg);background:var(--red);margin:0 auto;border-radius:2px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--ink-2);margin-top:6px}
+.legend i{display:inline-block;width:14px;height:10px;border-radius:3px;vertical-align:middle;margin-right:4px}
+.small{font-size:13px;color:var(--ink-3)}
+footer{margin-top:60px;color:var(--ink-3);font-size:13px;border-top:1px solid var(--line);padding-top:16px}
+@media (max-width:640px){.hero h1{font-size:26px}.part>h2{font-size:22px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <h1>词猎 · AI 抗遗忘单词学习系统</h1>
+  <p class="sub">软件 Demo 调研报告 · 架构方案 · 原型设计 · 开发计划</p>
+  <div class="meta">基于 cilie.pdf（Ben，2025-10-27 构想稿）整理 · 汇报日期 2026-11-04 · 调研由三个独立子任务（Opus）完成，方案与计划由本会话综合</div>
+</header>
+
+<nav class="toc">
+  <a href="#summary">总览</a>
+  <a href="#research">① 开源调研报告</a>
+  <a href="#arch">② Demo 架构方案</a>
+  <a href="#proto">③ 原型设计</a>
+  <a href="#plan">④ 开发计划</a>
+</nav>
+
+<section id="summary" class="part">
+  <h2>总览<small>EXECUTIVE SUMMARY</small></h2>
+  <div class="callout">
+    <b>一句话结论：</b>词猎的差异化不在硬件，而在"反应时间驱动的遗忘预测 + 实时插队调度"。这个假设可以用一个 <b>8～10 周的纯软件 Demo</b> 低成本验证：用开源 FSRS 作对照组、用带反应时特征的 HLR/FSRS 变体作实验组，在真实学生数据上做离线 + 在线 A/B 评测；验证通过后再启动墨水屏硬件。
+  </div>
+  <div class="kpi">
+    <div class="k"><b>4</b><span>核心验证问题：预测优于 SRS / 短期效果 / 硬件价值 / 付费意愿</span></div>
+    <div class="k"><b>2</b><span>算法组：FSRS 对照 vs. 反应时增强模型</span></div>
+    <div class="k"><b>10 周</b><span>Demo 开发 + 内测 + 结论</span></div>
+    <div class="k"><b>3～4 人</b><span>算法 / 前端 / 后端兼数据 / 产品兼内容</span></div>
+  </div>
+  <p>本汇报分四部分：<b>①</b> 对可直接复用的开源项目做了系统梳理（记忆算法、词库与内容生成、工程栈与硬件原型）；<b>②</b> 基于调研给出 Demo 的分层架构、数据模型与调度算法设计；<b>③</b> 给出七个核心界面的原型与交互规范；<b>④</b> 给出分阶段开发计划、人员分工、验收指标与风险对策。</p>
+</section>
+
+<section id="research" class="part">
+  <h2>① 开源项目调研报告<small>RESEARCH</small></h2>
+  <p class="small">口径：三个调研子任务于 2026-11-04 完成。记忆算法部分的 Star 数、License、最近 push 时间通过 GitHub API 查询；词库与工程栈部分以仓库页面为准，未取得一手来源的信息标注"未核实"。商用前请逐一复核原始 LICENSE 文件。</p>
+
+  <h3>1.1 调研范围与结论速览</h3>
+  <div class="grid">
+    <div class="card"><b>A · 记忆算法与评测</b><p>FSRS 生态、Duolingo HLR、Ebisu、Anki/SM-2、墨墨 SSP-MMC、含反应时的研究（SlimStampen/ACT-R、KAR3L）、公开数据集。</p><p><span class="tag hi">结论</span>FSRS 作对照、HLR+反应时作实验组；<b>anki-revlogs-10k 是唯一带毫秒级作答时长的大规模公开数据</b>。</p></div>
+    <div class="card"><b>B · 词库、内容与发音</b><p>ECDICT、kajweb/dict、WordNet、wordfreq、CEFR、词根词缀、Tatoeba、Kokoro/Piper/edge-tts、DeepSeek/Qwen/Ollama、Instructor。</p><p><span class="tag hi">结论</span>ECDICT（MIT，自带中高考标签）为主词典；发音用 Kokoro（Apache-2.0）离线预生成；LLM 用 DeepSeek + Instructor 预生成并人工抽审。</p></div>
+    <div class="card"><b>C · 工程栈与硬件</b><p>PWA/Flutter/Tauri/RN、PowerSync/ElectricSQL/CRDT、Anki/qwerty-learner、ESP32 墨水屏设备、FastAPI/PocketBase/Supabase、GrowthBook、DuckDB。</p><p><span class="tag hi">结论</span>主推 PWA + SQLite-WASM + ts-fsrs + FastAPI；备选 Flutter + PowerSync；硬件走 ESP32-S3 + GxEPD2 + 7 键。</p></div>
+  </div>
+
+  <h3>1.2 记忆算法与评测框架</h3>
+  <table>
+    <tr><th>项目</th><th>License</th><th>语言 / 活跃度</th><th>核心能力</th><th>适配</th><th>集成建议</th></tr>
+    <tr><td><a href="https://github.com/open-spaced-repetition/ts-fsrs">ts-fsrs</a></td><td>MIT</td><td>TS · ~850★ · 2026-10</td><td>前端/Node 端 FSRS 调度器</td><td><span class="tag hi">高</span></td><td>直接依赖，Demo 客户端对照组调度器</td></tr>
+    <tr><td><a href="https://github.com/open-spaced-repetition/py-fsrs">py-fsrs</a> / <a href="https://github.com/open-spaced-repetition/fsrs-optimizer">fsrs-optimizer</a></td><td>MIT / BSD-3</td><td>Python · ~520★ / ~110★ · 2026-08</td><td>Python 调度器与个人参数拟合</td><td><span class="tag hi">高</span></td><td>直接依赖，离线评测与每夜训练；对照组必须做个性化拟合才公平</td></tr>
+    <tr><td><a href="https://github.com/open-spaced-repetition/fsrs-rs">fsrs-rs</a></td><td>BSD-3</td><td>Rust · ~460★ · 2026-11</td><td>Anki 内置的高性能优化器</td><td><span class="tag mid">中</span></td><td>后端批量优化可选；未来可编译到硬件</td></tr>
+    <tr><td><a href="https://github.com/open-spaced-repetition/fsrs4anki">fsrs4anki</a></td><td>MIT</td><td>~4.1k★ · 2026-08</td><td>FSRS 算法文档与 DSR 模型（难度/稳定性/可提取性）</td><td><span class="tag mid">中</span></td><td>借鉴算法与文档</td></tr>
+    <tr><td><a href="https://github.com/open-spaced-repetition/srs-benchmark">srs-benchmark</a></td><td><b>未声明</b></td><td>Python · ~280★ · 2026-10</td><td>统一评测框架，覆盖 FSRS v1–7、HLR、DASH、ACT-R、Ebisu、GRU/LSTM、RWKV；LSTM 支持 <code>--duration</code> 把作答时长作为输入</td><td><span class="tag hi">高</span></td><td>仅用于评测，复用协议与指标；复制代码前需确认授权</td></tr>
+    <tr><td><a href="https://github.com/duolingo/halflife-regression">Duolingo HLR</a></td><td>MIT</td><td>Python · ~580★ · 2024-04 停更</td><td>半衰期回归 h=2^(θ·x)，p=2^(−Δ/h)，约 300 行；附 1300 万条数据集（无反应时）</td><td><span class="tag hi">高</span></td><td>借鉴后重写；加入反应时特征几乎零成本，是实验组骨架</td></tr>
+    <tr><td><a href="https://github.com/fasiha/ebisu">Ebisu</a></td><td>Unlicense</td><td>Python ~340★ / JS ~50★</td><td>贝叶斯回忆概率，任意时刻可查 P(回忆)，支持软结果</td><td><span class="tag mid">中</span></td><td>借鉴算法，黄键可映射为软结果；精度落后于 FSRS/HLR，可作第三基线</td></tr>
+    <tr><td><a href="https://github.com/ankitects/anki">Anki</a></td><td>AGPL-3.0（未核实细节）</td><td>Rust/Python/TS · ~32.5k★ · 活跃</td><td>内置 FSRS 与 SM-2 改良版；revlog 表含 time 字段（毫秒）</td><td><span class="tag lo">低</span></td><td>仅参考数据模型与队列设计；AGPL 不嵌入。SM-2 自写几十行作下限基线</td></tr>
+    <tr><td><a href="https://github.com/maimemo/SSP-MMC">墨墨 SSP-MMC</a> / <a href="https://github.com/maimemo/SSP-MMC-Plus">Plus</a></td><td>MIT</td><td>Python · ~230★ · 2025-11 · KDD 2022 / TKDE 2023</td><td>DHP 记忆模型（难度–半衰期–回忆概率）+ 随机最短路调度；配套 2.2 亿条中国用户背单词日志（CC-BY-NC-4.0，无反应时）</td><td><span class="tag hi">高</span></td><td>借鉴算法与"按半衰期调度"思路；数据仅限研究</td></tr>
+    <tr><td>SlimStampen / MemoryLab（<a href="https://pubmed.ncbi.nlm.nih.gov/26748838/">Sense et al. 2016</a>）</td><td>应用未开源，仅 R 分析包</td><td>学术</td><td>基于 ACT-R 激活值预测"期望反应时"，用观测 RT 与期望的偏差在线修正每个词的遗忘率 α，并截断 RT 防分心；α 可预测考试成绩</td><td><span class="tag hi">高</span></td><td><b>这几乎就是词猎的核心假设</b>，借鉴其 α 修正公式</td></tr>
+    <tr><td><a href="https://arxiv.org/abs/2402.12291">KAR3L</a>（EMNLP 2024）</td><td>MIT（旧代码）</td><td>Python · 8★</td><td>BERT 卡面语义 + 相似卡片检索做回忆预测；在线对比 FSRS 主要收益是回忆更快</td><td><span class="tag mid">中</span></td><td>借鉴思路：语义/形近特征对易混词有价值</td></tr>
+  </table>
+  <h4>srs-benchmark 参考结果（anki-revlogs-10k，不含同日复习）</h4>
+  <table>
+    <tr><th>模型</th><th>Log Loss ↓</th><th>RMSE(bins) ↓</th><th>AUC ↑</th><th>用反应时？</th></tr>
+    <tr><td>RWKV-Instant</td><td>0.2773</td><td>0.0250</td><td>0.8329</td><td>可用</td></tr>
+    <tr><td>LSTM（<code>--duration</code>）</td><td>0.3332</td><td>0.0538</td><td>0.7329</td><td>是</td></tr>
+    <tr><td>FSRS-7</td><td>0.3363</td><td>0.0576</td><td>0.7243</td><td>否</td></tr>
+  </table>
+  <p class="small">提示：README 中有专门刷 RMSE(bins) 的基线（RMSE 0.0135 但 log loss 4.6），所以 RMSE(bins) 不能单独判胜负；FSRS、HLR、DASH、ACT-R 原版都不使用反应时，反应时增益的"天花板"可用 LSTM/RWKV 估计。</p>
+  <h4>可用于离线评测的公开数据集</h4>
+  <table>
+    <tr><th>数据集</th><th>规模</th><th>含反应时</th><th>许可</th><th>用途</th></tr>
+    <tr><td><a href="https://huggingface.co/datasets/open-spaced-repetition/anki-revlogs-10k">anki-revlogs-10k</a></td><td>1 万用户，7.28 亿条</td><td><b>有</b>（duration，毫秒，0–60000）</td><td>自定义；非 FSRS 用途需向 Anki 申请</td><td>主评测集，唯一能大规模验证 RT 增益的数据</td></tr>
+    <tr><td><a href="https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/N8XJME">Duolingo HLR</a></td><td>1300 万条</td><td>无</td><td>未写明</td><td>复现 HLR 基线</td></tr>
+    <tr><td><a href="https://sharedtask.duolingo.com/2018.html">Duolingo SLAM 2018</a></td><td>3 个语言方向</td><td>有（句级，秒）</td><td>未核实</td><td>辅助，粒度不匹配</td></tr>
+    <tr><td><a href="https://huggingface.co/datasets/Maimemo/student-memory-logs">MaiMemo</a></td><td>2.2 亿条</td><td>无</td><td>CC-BY-NC-4.0</td><td>领域最接近，仅研究用</td></tr>
+  </table>
+
+  <h3>1.3 词库、词典、例句与发音</h3>
+  <table>
+    <tr><th>项目</th><th>License</th><th>规模 / 活跃度</th><th>要点</th><th>适配</th><th>建议</th></tr>
+    <tr><td><a href="https://github.com/skywind3000/ECDICT">ECDICT</a></td><td>MIT</td><td>基础版 76 万条，完整版 222 万条；8.6k★；数据 2017 后仅维护</td><td>自带 tag（zk 中考 / gk 高考 / cet4…）、bnc/frq 词频、collins 星级、oxford 3000、exchange 词形、音标与中英释义</td><td><span class="tag hi">高</span></td><td>主词典，导入 SQLite 离线用；上游词条版权状态未核实，商用前法务评估</td></tr>
+    <tr><td><a href="https://github.com/kajweb/dict">kajweb/dict</a></td><td><b>无 LICENSE</b></td><td>中考/高考/CET/教材词书，带例句真题；3.8k★</td><td>数据爬自有道 App，音频走有道接口</td><td><span class="tag lo">低</span></td><td>侵权风险高，仅内部对照，不随产品分发</td></tr>
+    <tr><td><a href="https://github.com/LazuliKao/brochure-of-vocabularies">brochure-of-vocabularies</a></td><td>Apache-2.0</td><td>高考 3500 词 TXT/PDF</td><td>用于校对词表，上游来源未说明</td><td><span class="tag mid">中</span></td><td>词表对齐参考</td></tr>
+    <tr><td><a href="https://github.com/globalwordnet/english-wordnet">Open English WordNet</a></td><td>CC-BY 4.0</td><td>10.7 万 synset，2025-12 版</td><td>英文释义与同反义关系，无中文</td><td><span class="tag mid">中</span></td><td>生成近义辨析与干扰项</td></tr>
+    <tr><td><a href="https://github.com/rspeer/wordfreq">wordfreq</a></td><td>代码 Apache-2.0；数据 CC BY-SA 4.0</td><td>40+ 语言；已停更，数据至 2021</td><td>Zipf 频率分层</td><td><span class="tag mid">中</span></td><td>通用词频分层；派生数据分发需署名并同协议</td></tr>
+    <tr><td><a href="https://github.com/Maximax67/Words-CEFR-Dataset">Words-CEFR-Dataset</a> / <a href="https://github.com/openlanguageprofiles/olp-en-cefrj">CEFR-J</a></td><td>MIT / 底层未核实</td><td>词 → A1–C2</td><td>难度层级；English Profile、Oxford 5000 非开放许可</td><td><span class="tag mid">中</span></td><td>难度标注补充</td></tr>
+    <tr><td><a href="https://colingoldberg.github.io/morphemes/morpheme/dataset/2019/06/03/morpheme-dataset.html">Morpheme Dataset</a> / <a href="https://zenodo.org/records/5172857">WikiMorph</a></td><td>未核实 / 大概率 CC BY-SA</td><td>前缀 3000+ 词根 1000+ / 35.6 万词词素拆分</td><td>词根词缀底表</td><td><span class="tag mid">中</span></td><td>二期词根词缀卡片</td></tr>
+    <tr><td>易混词</td><td>—</td><td>无成熟开源中文易混词库</td><td>Wikipedia 列表、PlainSpell 53 万对（算法生成）</td><td><span class="tag mid">中</span></td><td>在 3500 词内按编辑距离 ≤ 2 与 CMUdict 读音相近自动生成候选，LLM + 人工筛选</td></tr>
+    <tr><td><a href="https://tatoeba.org/en/downloads">Tatoeba</a></td><td>CC BY 2.0 FR（部分 CC0）；音频逐条授权</td><td>eng–cmn 句对估计数万</td><td>真实例句带中文</td><td><span class="tag hi">高</span></td><td>按词检索，先过滤句长与超纲词；保留署名</td></tr>
+    <tr><td><a href="https://github.com/hexgrad/kokoro">Kokoro-82M</a></td><td>代码与权重 Apache-2.0</td><td>82M 参数，支持美/英式英语与中文</td><td>CPU 可跑，离线批量合成</td><td><span class="tag hi">高</span></td><td><b>推荐</b>：预生成 3500 词与例句 mp3；单词重音需抽检</td></tr>
+    <tr><td><a href="https://github.com/OHF-Voice/piper1-gpl">Piper</a></td><td>GPL-3.0，音色许可各异</td><td>6.2k★，正在找维护者</td><td>离线 TTS</td><td><span class="tag mid">中</span></td><td>仅离线生成文件、不嵌入产品，影响较小</td></tr>
+    <tr><td><a href="https://github.com/rany2/edge-tts">edge-tts</a></td><td>GPL-3.0（推断）</td><td>—</td><td>调用微软在线 TTS 非正式接口</td><td><span class="tag lo">低–中</span></td><td>仅内部原型，商用有合规风险</td></tr>
+    <tr><td><a href="https://github.com/idiap/coqui-ai-TTS">Coqui XTTS-v2</a></td><td>代码 MPL-2.0；权重 CPML 禁商用</td><td>公司已关停</td><td>—</td><td><span class="tag lo">低</span></td><td>不采用</td></tr>
+    <tr><td><a href="https://github.com/cmusphinx/cmudict">CMUdict</a></td><td>允许商用，需署名</td><td>约 13 万词</td><td>音标补全、音节划分、读音相似度</td><td><span class="tag hi">高</span></td><td>直接依赖</td></tr>
+  </table>
+
+  <h3>1.4 LLM 内容生成</h3>
+  <table>
+    <tr><th>项目</th><th>License / 成本</th><th>要点</th><th>适配</th><th>建议</th></tr>
+    <tr><td><a href="https://api-docs.deepseek.com/quick_start/pricing">DeepSeek API</a></td><td>flash 版每百万 token 输入 $0.15–0.3、输出 $0.6–1.2（分峰谷）；支持 JSON Output</td><td>国内直连；3500 词 × 若干例句总成本估计几十元人民币</td><td><span class="tag hi">高</span></td><td>批量预生成主力；模型名变动频繁，做成可配置</td></tr>
+    <tr><td><a href="https://github.com/QwenLM/Qwen3">Qwen3</a></td><td>Apache-2.0</td><td>0.6B–32B 稠密 + MoE；可走百炼 API 或本地部署</td><td><span class="tag hi">高</span></td><td>自部署/离线兜底</td></tr>
+    <tr><td><a href="https://github.com/ollama/ollama">Ollama</a></td><td>MIT</td><td><code>ollama run qwen3:8b</code> 约 5GB 本地离线</td><td><span class="tag hi">高</span></td><td>Demo 演示与离线批处理</td></tr>
+    <tr><td><a href="https://github.com/vllm-project/vllm">vLLM</a></td><td>Apache-2.0</td><td>GPU 高吞吐，guided decoding</td><td><span class="tag mid">中</span></td><td>量产内容时使用</td></tr>
+    <tr><td><a href="https://github.com/567-labs/instructor">Instructor</a></td><td>MIT</td><td>Pydantic 结构化输出 + 失败重试，兼容 OpenAI 接口</td><td><span class="tag hi">高</span></td><td><b>推荐</b>，接 DeepSeek/百炼/Ollama</td></tr>
+    <tr><td><a href="https://github.com/dottxt-ai/outlines">Outlines</a></td><td>Apache-2.0（未核实）</td><td>约束解码保证 JSON 合法</td><td><span class="tag mid">中</span></td><td>本地模型时使用</td></tr>
+  </table>
+
+  <h3>1.5 应用框架、离线同步与可借鉴的开源应用</h3>
+  <table>
+    <tr><th>项目</th><th>License</th><th>栈 / 活跃度</th><th>要点</th><th>适配</th><th>建议</th></tr>
+    <tr><td>PWA（Vite + TS）</td><td>标准</td><td>Web，生态最活跃</td><td><code>event.timeStamp</code> 与 <code>performance.now()</code> 共用高精度时钟，Chrome 约 0.1 ms；Firefox 隐私模式会降精度；文献测得 jsPsych 有约 60 ms 固定偏移可校准扣除</td><td><span class="tag hi">高</span></td><td><b>主推</b>；要求 Chrome/Edge，记录 UA 与刷新率</td></tr>
+    <tr><td><a href="https://github.com/flutter/flutter">Flutter</a></td><td>BSD-3</td><td>Dart · ~17 万★</td><td>自绘渲染，单调时钟 Stopwatch；drift/sqflite 成熟；未来可迁 Linux 墨水屏（flutter-pi）</td><td><span class="tag hi">高</span></td><td>备选，原生事件延迟更稳</td></tr>
+    <tr><td><a href="https://github.com/tauri-apps/tauri">Tauri 2</a></td><td>MIT/Apache-2.0</td><td>Rust + WebView · ~9 万★</td><td>桌面适合接 USB 小键盘模拟三键；移动端不够成熟</td><td><span class="tag mid">中</span></td><td>桌面实验台可选</td></tr>
+    <tr><td><a href="https://github.com/expo/expo">React Native / Expo</a></td><td>MIT</td><td>JS · 12 万 / 4 万★</td><td>触摸事件过 JS 桥，时间戳抖动较大（未实测）</td><td><span class="tag mid">中</span></td><td>不优先</td></tr>
+    <tr><td><a href="https://github.com/powersync-ja">PowerSync</a></td><td>SDK Apache-2.0；服务端 FSL（未核实）</td><td>Postgres ↔ SQLite，活跃</td><td>自带离线写队列，Flutter/Web SDK</td><td><span class="tag hi">高</span></td><td>选 Flutter 时配套</td></tr>
+    <tr><td><a href="https://github.com/electric-sql/electric">ElectricSQL</a></td><td>Apache-2.0</td><td>—</td><td>新版只负责读同步</td><td><span class="tag mid">中</span></td><td>不优先</td></tr>
+    <tr><td><a href="https://github.com/yjs/yjs">Yjs</a> / <a href="https://github.com/automerge/automerge">Automerge</a> / cr-sqlite</td><td>MIT</td><td>CRDT</td><td>学习日志是只追加事件，无协同冲突</td><td><span class="tag lo">低</span></td><td>过度设计，不采用；自研 append-only 事件 + UUIDv7 即可</td></tr>
+    <tr><td><a href="https://github.com/RealKai42/qwerty-learner">qwerty-learner</a></td><td>GPL-3.0</td><td>React + TS · 1.5 万★以上（未核实）</td><td>国内最活跃背单词项目，词库 JSON 组织与逐词流程 UI 可参考</td><td><span class="tag mid">中</span></td><td>仅参考，不复制代码</td></tr>
+    <tr><td><a href="https://github.com/ankidroid/Anki-Android">AnkiDroid</a></td><td>GPL-3.0</td><td>Kotlin · 1 万★以上</td><td>物理键/手柄映射到答题按钮的实现</td><td><span class="tag mid">中</span></td><td>借鉴三键交互</td></tr>
+    <tr><td><a href="https://github.com/fastapi/fastapi">FastAPI</a> / <a href="https://github.com/pocketbase/pocketbase">PocketBase</a> / <a href="https://github.com/supabase/supabase">Supabase</a></td><td>MIT / MIT（未核实） / Apache-2.0</td><td>活跃</td><td>FastAPI 与算法同栈；PocketBase 单二进制起步最快；Supabase 配 PowerSync</td><td><span class="tag hi">高</span></td><td>主推 FastAPI；Demo 期可用 PocketBase 省事</td></tr>
+    <tr><td><a href="https://github.com/growthbook/growthbook">GrowthBook</a> / <a href="https://github.com/duckdb/duckdb">DuckDB</a></td><td>MIT（open core）/ MIT</td><td>活跃</td><td>离线判定分组的 A/B；Parquet 日志本地回放评测</td><td><span class="tag hi">高</span></td><td>DuckDB + Jupyter + py-fsrs 组成评测台</td></tr>
+  </table>
+
+  <h3>1.6 硬件原型相关（次优先，供 M2 后参考）</h3>
+  <table>
+    <tr><th>项目</th><th>License</th><th>要点</th><th>适配</th></tr>
+    <tr><td><a href="https://github.com/ZinggJM/GxEPD2">GxEPD2</a></td><td>GPL-3.0（未核实）</td><td>主流 SPI 墨水屏驱动，支持局部刷新</td><td><span class="tag hi">高</span></td></tr>
+    <tr><td><a href="https://github.com/vroland/epdiy">epdiy</a></td><td>LGPL-3.0（未核实）</td><td>并行接口大屏，16 级灰度</td><td><span class="tag mid">中–高</span></td></tr>
+    <tr><td><a href="https://github.com/Xinyuan-LilyGO/LilyGo-EPD47">LilyGo T5 4.7</a></td><td>GPL-3.0</td><td>ESP32-S3 + 4.7″，成本低，适合外观与按键手感原型</td><td><span class="tag hi">高</span></td></tr>
+    <tr><td><a href="https://github.com/sqfmi/Watchy">Watchy</a> / <a href="https://github.com/Sparkadium/Watchy-Dictionary">Watchy-Dictionary</a></td><td>MIT（未核实）</td><td>ESP32 + 4 物理键，与词猎按键模型相近；4MB Flash 存 3.7 万词离线词典</td><td><span class="tag mid">中</span></td></tr>
+    <tr><td><a href="https://github.com/SolderedElectronics/Inkplate-Arduino-library">Inkplate</a> / M5Paper / <a href="https://github.com/joeycastillo/The-Open-Book">The Open Book</a></td><td>各异</td><td>资料完整；Open Book 的物理键与中文字库存储思路可参考</td><td><span class="tag mid">中</span></td></tr>
+    <tr><td><a href="https://github.com/koreader/koreader">KOReader</a> / <a href="https://wiki.pine64.org/wiki/PineNote">PineNote</a></td><td>AGPL / 开放资料</td><td>可在现成 Kindle/Kobo 或 RK3566 设备上跑早期用户测试，不适合量产</td><td><span class="tag lo">低–中</span></td></tr>
+    <tr><td>PocketMage PDA</td><td>CC BY-NC-SA</td><td>禁商用，仅参考</td><td><span class="tag lo">低</span></td></tr>
+  </table>
+
+  <h3>1.7 调研结论：Demo 选型清单</h3>
+  <table>
+    <tr><th>用途</th><th>选定</th><th>License</th><th>备选</th></tr>
+    <tr><td>对照组算法</td><td>FSRS（ts-fsrs 客户端 / py-fsrs + optimizer 后端）+ HLR 原版 + SM-2 下限</td><td>MIT / BSD</td><td>Ebisu</td></tr>
+    <tr><td>实验组算法</td><td>HLR + 反应时特征（自研重写）；FSRS + 反应时修正（SlimStampen α 思路）</td><td>自研</td><td>LSTM --duration 作天花板</td></tr>
+    <tr><td>评测</td><td>srs-benchmark 协议 + anki-revlogs-10k（duration）+ DuckDB/Jupyter</td><td>需申请数据用途</td><td>MaiMemo（仅研究）</td></tr>
+    <tr><td>词典 / 词表</td><td>ECDICT（zk/gk 标签）+ brochure 3500 词校对 + CMUdict</td><td>MIT / Apache / 署名</td><td>WordNet、wordfreq、CEFR 作分层</td></tr>
+    <tr><td>例句</td><td>Tatoeba eng–cmn 检索 + LLM 生成（限 3500 词内）</td><td>CC BY</td><td>—</td></tr>
+    <tr><td>发音</td><td>Kokoro-82M 离线预生成</td><td>Apache-2.0</td><td>Piper（仅生成文件）</td></tr>
+    <tr><td>LLM</td><td>DeepSeek flash + Instructor，预生成 + 人工抽审</td><td>按量付费</td><td>Ollama + Qwen3-8B 离线</td></tr>
+    <tr><td>客户端</td><td>PWA（Vite + React + TS）+ SQLite-WASM(OPFS)</td><td>MIT</td><td>Flutter + drift + PowerSync</td></tr>
+    <tr><td>后端</td><td>FastAPI + PostgreSQL</td><td>MIT</td><td>PocketBase 起步</td></tr>
+    <tr><td>硬件原型</td><td>ESP32-S3 + 4.2″ SPI 墨水屏 + GxEPD2 + 7 键；先用 LilyGo T5 验证刷新延迟与按键中断时间戳</td><td>GPL 驱动需评估</td><td>Watchy 验证按键模型</td></tr>
+  </table>
+
+  <h3>1.8 调研发现的关键风险</h3>
+  <ul>
+    <li><b>评测数据与产品数据语义不一致：</b>Anki 的 duration 是"看卡到按键"的总时长，含翻面阅读；词猎的 RT 是"呈现词到按三键"。公开数据上的增益不一定迁移，必须用自有数据复验。</li>
+    <li><b>增益可能很小：</b>benchmark 中 FSRS-7 与 LSTM 的 log loss 仅差约 0.003，RT 的边际增益需要较大样本才显著，内测前要做功效分析。</li>
+    <li><b>三键自评有偏：</b>"绿"不等于真记得；需抽样插入拼写/选择题做客观校验。</li>
+    <li><b>插队改变分布：</b>阈值插队会改变复习时机，造成离线评估的选择偏差；上线后要保留随机化对照流量。</li>
+    <li><b>墨水屏刷新延迟：</b>局部刷新约 200–500 ms，全刷 1–2 s，会让刺激呈现时间失真；软件 Demo 的 RT 分布不能直接搬到硬件，需要在软件里模拟延迟或在硬件上重新标定。</li>
+    <li><b>许可：</b>Anki/AnkiDroid/KOReader/qwerty-learner 为 AGPL/GPL 只能参考；kajweb/dict 与有道音频无授权；XTTS 权重禁商用；edge-tts 走非官方接口；srs-benchmark 无 License；MaiMemo 与 anki-revlogs-10k 仅限研究。</li>
+    <li><b>未成年人数据合规：</b>需满足《个人信息保护法》《儿童个人信息网络保护规定》，监护人同意、最小化采集、境内存储；生成内容面向未成年人，需敏感词、事实性与超纲词三道检查，并关注生成式 AI 服务备案与标识义务（未核实适用范围）。</li>
+    <li><b>离线时钟漂移：</b>设备时钟不准导致日志乱序；用单调时钟 + 同步时校准偏移。</li>
+  </ul>
+</section>
+
+
+<section id="arch" class="part">
+  <h2>② Demo 架构方案<small>ARCHITECTURE</small></h2>
+
+  <h3>2.1 Demo 的目标与边界</h3>
+  <div class="grid">
+    <div class="card"><b>要验证什么</b>
+      <ul>
+        <li>H1：加入反应时间等行为特征后，遗忘预测的 log loss / AUC 显著优于 FSRS-5 基线。</li>
+        <li>H2："P(遗忘)&gt;阈值即插队"的调度，在同等学习时长下 7 日留存率高于固定间隔。</li>
+        <li>H3：三键 + 反应时的交互学生能接受（每次作答 ≤ 3 s，日均坚持 ≥ 15 min）。</li>
+      </ul>
+    </div>
+    <div class="card"><b>明确不做</b>
+      <ul>
+        <li>不做硬件、不做蓝牙/固件，用网页/手机模拟三键。</li>
+        <li>不做完整 3500 词内容精修，先覆盖中考核心 ~1600 词。</li>
+        <li>不做家长端、商城、社交；只做学生端 + 实验后台。</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>2.2 总体架构</h3>
+  <p>采用"<b>离线优先客户端 + 轻后端</b>"结构。调度与遗忘预测的推理放在客户端（保证断网可学、与未来硬件的纯离线模式一致），模型训练、LLM 内容生成和实验分析放在后端。</p>
+  <figure>
+  <svg viewBox="0 0 980 520" role="img" aria-label="词猎 Demo 架构：离线优先 PWA 客户端通过同步 API 与后端通信，后端包含事件存储、模型训练、内容引擎与实验分析">
+    <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+    <g font-size="12" fill="currentColor" stroke="currentColor">
+      <!-- client -->
+      <rect x="20" y="40" width="380" height="440" rx="12" fill="none" stroke-width="1.5"/>
+      <text x="36" y="66" font-size="14" font-weight="700" stroke="none">客户端 · PWA（React + TS，离线优先）</text>
+      <rect x="40" y="86" width="340" height="60" rx="8" fill="none"/>
+      <text x="56" y="110" stroke="none" font-weight="600">学习流 UI</text>
+      <text x="56" y="130" stroke="none" fill="var(--ink-3)">今日简报 / 单词卡 / 插队提示 / 睡前战役 / 战报</text>
+      <rect x="40" y="160" width="160" height="70" rx="8" fill="none"/>
+      <text x="56" y="184" stroke="none" font-weight="600">三键 &amp; 反应时采集</text>
+      <text x="56" y="204" stroke="none" fill="var(--ink-3)">performance.now()</text>
+      <text x="56" y="220" stroke="none" fill="var(--ink-3)">键盘 / 触屏 / 手柄</text>
+      <rect x="220" y="160" width="160" height="70" rx="8" fill="none" stroke="var(--accent)" stroke-width="2"/>
+      <text x="236" y="184" stroke="none" font-weight="600" fill="var(--accent)">本地调度器</text>
+      <text x="236" y="204" stroke="none" fill="var(--ink-3)">P(遗忘) 实时计算</text>
+      <text x="236" y="220" stroke="none" fill="var(--ink-3)">5min/30min/今晚 队列</text>
+      <rect x="40" y="246" width="340" height="56" rx="8" fill="none"/>
+      <text x="56" y="268" stroke="none" font-weight="600">遗忘模型（推理）</text>
+      <text x="56" y="288" stroke="none" fill="var(--ink-3)">FSRS-5 (ts-fsrs) ｜ RT-HLR 变体（参数由后端下发）</text>
+      <rect x="40" y="318" width="340" height="56" rx="8" fill="none"/>
+      <text x="56" y="340" stroke="none" font-weight="600">本地存储 · SQLite (wa-sqlite / OPFS)</text>
+      <text x="56" y="360" stroke="none" fill="var(--ink-3)">words · cards · review_events · queues · content_cache</text>
+      <rect x="40" y="390" width="340" height="40" rx="8" fill="none"/>
+      <text x="56" y="415" stroke="none" font-weight="600">同步代理 <tspan fill="var(--ink-3)" font-weight="400">事件追加日志，幂等上传 / 拉取参数与内容</tspan></text>
+      <!-- flows inside client -->
+      <line x1="120" y1="230" x2="120" y2="246" marker-end="url(#ar)"/>
+      <text x="126" y="243" stroke="none" fill="var(--ink-3)" font-size="11">写事件</text>
+      <line x1="300" y1="230" x2="300" y2="246" marker-end="url(#ar)"/>
+      <text x="306" y="243" stroke="none" fill="var(--ink-3)" font-size="11">查 P(遗忘)</text>
+      <line x1="210" y1="302" x2="210" y2="318" marker-end="url(#ar)"/>
+      <line x1="210" y1="374" x2="210" y2="390" marker-end="url(#ar)"/>
+      <!-- sync arrows -->
+      <line x1="380" y1="405" x2="560" y2="405" marker-end="url(#ar)" marker-start="url(#ar)"/>
+      <text x="470" y="390" text-anchor="middle" stroke="none" fill="var(--ink-3)" font-size="11">HTTPS 批量同步</text>
+      <text x="470" y="424" text-anchor="middle" stroke="none" fill="var(--ink-3)" font-size="11">事件上传 · 参数/内容下发</text>
+      <!-- backend -->
+      <rect x="560" y="40" width="400" height="440" rx="12" fill="none" stroke-width="1.5"/>
+      <text x="576" y="66" font-size="14" font-weight="700" stroke="none">后端（FastAPI + PostgreSQL）</text>
+      <rect x="580" y="86" width="360" height="56" rx="8" fill="none"/>
+      <text x="596" y="108" stroke="none" font-weight="600">同步 API &amp; 事件仓库</text>
+      <text x="596" y="128" stroke="none" fill="var(--ink-3)">append-only review_events，按 user/device 分片</text>
+      <rect x="580" y="158" width="170" height="70" rx="8" fill="none" stroke="var(--accent)" stroke-width="2"/>
+      <text x="596" y="182" stroke="none" font-weight="600" fill="var(--accent)">模型训练服务</text>
+      <text x="596" y="202" stroke="none" fill="var(--ink-3)">每夜拟合 FSRS 参数</text>
+      <text x="596" y="218" stroke="none" fill="var(--ink-3)">训练 RT-HLR，下发权重</text>
+      <rect x="770" y="158" width="170" height="70" rx="8" fill="none"/>
+      <text x="786" y="182" stroke="none" font-weight="600">内容引擎</text>
+      <text x="786" y="202" stroke="none" fill="var(--ink-3)">LLM 例句 / 对比卡 / 故事</text>
+      <text x="786" y="218" stroke="none" fill="var(--ink-3)">审核 → 缓存 → 预下发</text>
+      <rect x="580" y="244" width="360" height="56" rx="8" fill="none"/>
+      <text x="596" y="266" stroke="none" font-weight="600">词库服务</text>
+      <text x="596" y="286" stroke="none" fill="var(--ink-3)">ECDICT 清洗版 + 中考核心词标注 + 形近词表 + 发音 URL</text>
+      <rect x="580" y="316" width="360" height="56" rx="8" fill="none"/>
+      <text x="596" y="338" stroke="none" font-weight="600">实验与分析</text>
+      <text x="596" y="358" stroke="none" fill="var(--ink-3)">A/B 分组 · 离线评测 Notebook · 留存 / 校准看板</text>
+      <rect x="580" y="388" width="360" height="40" rx="8" fill="none"/>
+      <text x="596" y="413" stroke="none" font-weight="600">外部依赖 <tspan fill="var(--ink-3)" font-weight="400">LLM API（DeepSeek/Qwen）· TTS（Kokoro 离线）</tspan></text>
+      <line x1="665" y1="142" x2="665" y2="158" marker-end="url(#ar)"/>
+      <line x1="855" y1="142" x2="855" y2="158" marker-end="url(#ar)"/>
+      <line x1="760" y1="300" x2="760" y2="316" marker-end="url(#ar)"/>
+      <line x1="855" y1="374" x2="855" y2="388" marker-end="url(#ar)"/>
+      <text x="862" y="385" stroke="none" fill="var(--ink-3)" font-size="11">调用</text>
+    </g>
+  </svg>
+  <figcaption>图 2-1 · 总体架构。绿色描边的两个模块（本地调度器、模型训练服务）是 Demo 验证的核心；其余模块尽量用开源件拼装。</figcaption>
+  </figure>
+
+  <h3>2.3 核心模块设计</h3>
+  <h4>A. 事件与数据模型（客户端与后端共享 schema）</h4>
+<pre><code>review_events (append-only)
+  id              ulid            客户端生成，幂等
+  user_id, device_id
+  word_id         int
+  ts              int(ms)         作答时间
+  rating          enum(1 red,2 yellow,3 green)
+  rt_ms           int             从单词显示到按键的毫秒数
+  mode            enum(recall_en2zh, recall_zh2en, spell, listen)
+  queue           enum(new, five_min, thirty_min, tonight, interrupt, scheduled, boss)
+  error_type      enum(null, unseen, confused, spelling, listening)
+  confused_with   int?            形近/音近词 id
+  session_id, slot enum(morning, mid, night)
+  model_version, predicted_p      决策时的预测值，用于事后校准分析
+
+cards (每用户每词的记忆状态)
+  word_id, stability, difficulty, last_review, reps, lapses,
+  rt_ema          float           反应时指数移动平均
+  pool            enum(unknown, half, known, longterm)
+  next_due        int(ms)</code></pre>
+
+  <h4>B. 遗忘模型：对照组与实验组</h4>
+  <div class="grid">
+    <div class="card"><b>对照组 · FSRS-5</b>
+      <p>直接使用 ts-fsrs（客户端）与 py-fsrs / fsrs-optimizer（后端），默认参数起步，积累 ≥ 1000 条复习后每夜按用户拟合。可召回率 R(t)=（1 + t/(9·S))^-1，目标 R=0.9。</p>
+    </div>
+    <div class="card"><b>实验组 · RT-HLR（反应时增强）</b>
+      <p>以 Duolingo HLR 的半衰期回归为骨架 <code>h = 2^(θ·x)</code>，特征 x 增加：log 反应时、反应时 z 分数（相对该用户）、"绿但慢"计数、黄灯计数、错因类型、形近词混淆次数、时段（早/中/晚）。P(遗忘)=1-2^(-Δt/h)。</p>
+      <p class="small">同时保留 <b>HLR 原版</b>（不含 RT）作为严格对照，使实验组与对照组只差反应时一个变量；SM-2 作为下限基线。第二阶段可改为"FSRS + 反应时修正项"：参考 SlimStampen 的 α 修正，用观测 RT 与期望 RT 的偏差调节 stability 增长系数，不脱离 FSRS 生态。</p>
+    </div>
+  </div>
+
+  <h4>C. 本地调度器（Demo 的核心机制）</h4>
+<pre><code>on_answer(word, rating, rt_ms):
+  log_event(...)
+  update_card(word, rating, rt_ms)              # 两个模型并行更新，按实验分组取其一决策
+  if rating == RED:        push(five_min, word, +5min); push(tonight, word)
+  elif rating == YELLOW:   push(thirty_min, word, +30min); push(tonight, word)
+  elif rt_ms &gt; slow_threshold(user):            # 绿但慢 → 濒临遗忘
+                           push(tonight, word); mark(card, "fragile")
+  else:                    schedule_by_model(word)  # 明天或更晚
+
+next_item(now):
+  due = [w for w in queues if w.due &lt;= now]
+  risk = [w for w in cards if P_forget(w, now) &gt; τ and not w.seen_in(20min)]
+  if due or risk:  return pick(due + risk, priority=core_word, P_forget)   # 插队，UI 显示"老朋友来看你"
+  if new_budget_left(): return next_new_word()
+  return next_scheduled_review()</code></pre>
+  <p>阈值 τ 与慢反应阈值是实验参数（默认 τ=0.3，慢阈值取用户近 200 次绿灯反应时的 P75，冷启动 3 s），在实验后台可调。</p>
+
+  <h4>D. 内容引擎</h4>
+  <ul>
+    <li>静态层：ECDICT 释义 + 音标 + 词频 + 柯林斯星级 + zk/gk 标签；核心词按 gk/zk、Zipf 词频、collins、oxford、CEFR 加权分三档（核心/常用/拓展）；例句优先从 Tatoeba eng–cmn 检索；形近词表按编辑距离 ≤ 2 与 CMUdict 读音相近自动生成，LLM + 人工复核。</li>
+    <li>生成层：LLM 根据提示模板生成"含近期错词的例句""对比卡片""周末错词故事"。生成在后端完成，经敏感词与年龄适配审核后写入 content_cache，客户端预拉取当日所需内容，保证离线可用。</li>
+    <li>发音：Kokoro-82M 离线批量生成单词与例句音频（mp3），静态目录分发；音标用 CMUdict + ECDICT 补全；Demo 阶段不做真人音频。</li>
+  </ul>
+
+  <h3>2.4 技术选型汇总</h3>
+  <table>
+    <tr><th>层</th><th>选型</th><th>理由</th><th>备选</th></tr>
+    <tr><td>客户端</td><td>React + TypeScript + Vite，PWA</td><td>event.timeStamp / performance.now 在 Chrome 约 0.1 ms 精度，零安装便于学生内测；要求 Chrome/Edge 并记录 UA 与刷新率</td><td>Flutter + drift + PowerSync（原生事件延迟更稳，可迁 Linux 墨水屏）</td></tr>
+    <tr><td>本地存储</td><td>wa-sqlite（OPFS）或 Dexie(IndexedDB)</td><td>SQL 方便做队列与统计查询，schema 与后端一致</td><td>Dexie 更简单，若 OPFS 兼容性有问题可切换</td></tr>
+    <tr><td>调度/模型</td><td>ts-fsrs + HLR 原版（对照）+ 自研 RT-HLR（TS 推理，Python 训练）</td><td>FSRS 社区成熟；HLR 约 300 行、结构简单可解释，加反应时特征零成本；HLR 原版对照保证只差 RT 一个变量</td><td>FSRS + RT 修正项；fsrs-rs 编译 wasm</td></tr>
+    <tr><td>后端</td><td>FastAPI + PostgreSQL + Redis(可选)</td><td>算法同学用 Python；Jupyter 离线评测同栈</td><td>Supabase / PocketBase 加速起步</td></tr>
+    <tr><td>LLM</td><td>DeepSeek flash + Instructor；本地 Ollama + Qwen3-8B 做离线兜底</td><td>国内可用、全量预生成成本几十元量级；Pydantic 结构化输出与重试</td><td>自部署 Qwen3 + vLLM</td></tr>
+    <tr><td>TTS</td><td>Kokoro-82M（离线批量预生成）</td><td>代码与权重 Apache-2.0，CPU 可跑，商用许可干净</td><td>Piper（GPL，仅用于生成文件）；edge-tts 仅内部原型</td></tr>
+    <tr><td>分析</td><td>DuckDB + Jupyter + py-fsrs，按 srs-benchmark 协议评测；GrowthBook 做离线分组</td><td>与 FSRS 社区评测方法可比；分组可离线判定</td><td>Metabase 看板</td></tr>
+  </table>
+</section>
+
+<section id="proto" class="part">
+  <h2>③ 原型设计<small>PROTOTYPE</small></h2>
+  <p>原型按未来硬件的约束来画：<b>黑白墨水屏、无触摸、三色键 + 十字键</b>。Demo 在网页上用键盘 <code>←</code>/<code>↓</code>/<code>→</code>（或 J/K/L）模拟红/黄/绿，手机上用底部三个大按钮。界面只保留一屏信息，文案遵循构想稿的"老朋友 / 战斗 / 救援"隐喻。</p>
+
+  <h3>3.1 核心界面</h3>
+  <div class="devices">
+    <div class="device"><div class="title">S1 · 今日简报（开机 3 秒）</div>
+      <div class="screen"><div class="hdr"><span>早晨 07:12</span><span>连续 12 天</span></div>
+        <div class="line"><b>早上好！今天有：</b></div>
+        <div class="line">23 个新朋友等你认识</div>
+        <div class="line">15 个老朋友差点忘了你</div>
+        <div class="line muted">预计战斗时间 22 分钟</div>
+        <div class="bar"><i style="width:38%"></i></div>
+        <div class="muted">昨晚 50 个复习词，预测遗忘点今晚 20:00</div>
+        <div class="prompt"><span>← 跳过直接学</span><span>任意键开始 →</span></div>
+      </div>
+      <div class="btns"><span class="btn r">红</span><span class="btn y">黄</span><span class="btn g">绿</span><span class="dpad"></span></div>
+      <p class="note">数据全部来自本地调度器的当日预算；不显示"背了多少"，显示"将被遗忘多少"。</p>
+    </div>
+    <div class="device"><div class="title">S2 · 单词卡（核心循环）</div>
+      <div class="screen"><div class="hdr"><span>新词 5/23</span><span>⏱ 1.4 s</span></div>
+        <div class="big">abandon</div>
+        <div class="ipa">/əˈbændən/ · v. ★★★ 中考核心</div>
+        <div class="line muted" style="margin-top:14px">按键后显示释义与例句</div>
+        <div class="line muted">↑ 听发音 &nbsp; ↓ 看例句</div>
+        <div class="prompt"><span>红 不认识</span><span>黄 模糊</span><span>绿 认识</span></div>
+      </div>
+      <div class="btns"><span class="btn r">红</span><span class="btn y">黄</span><span class="btn g">绿</span><span class="dpad"></span></div>
+      <p class="note">单词出现即开始计时；按键即停止并记录 rt_ms。右上角计时仅在 Demo 调试模式显示，正式版隐藏，避免学生"抢快"。</p>
+    </div>
+    <div class="device"><div class="title">S2b · 按键后反馈</div>
+      <div class="screen"><div class="hdr"><span>新词 5/23</span><span>绿 · 1.4 s</span></div>
+        <div class="big" style="font-size:20px">abandon <span class="ipa">v. 放弃；抛弃</span></div>
+        <div class="line">I won't <b>abandon</b> my plan to learn words during the <b>vacation</b>.</div>
+        <div class="muted">例句裹挟了你昨天错的 vacation</div>
+        <div class="line muted" style="margin-top:8px">AI：这个词明天 20:00 前大概率还记得 ✓</div>
+        <div class="prompt"><span>↑ 再听一遍</span><span>任意键 下一个</span></div>
+      </div>
+      <div class="btns"><span class="btn r">红</span><span class="btn y">黄</span><span class="btn g">绿</span><span class="dpad"></span></div>
+      <p class="note">绿灯但 rt &gt; 阈值时，提示改为"你犹豫了一下，今晚再来确认一次"，让学生理解插队逻辑。</p>
+    </div>
+    <div class="device"><div class="title">S3 · 老朋友插队</div>
+      <div class="screen"><div class="hdr"><span>有个老朋友来看你</span><span>P(忘)=0.42</span></div>
+        <div class="big">environment</div>
+        <div class="ipa">上次见面 2 天前 · 当时犹豫了 3.2 s</div>
+        <div class="line muted" style="margin-top:14px">答完继续刚才的新词</div>
+        <div class="prompt"><span>红 不认识</span><span>黄 模糊</span><span>绿 认识</span></div>
+      </div>
+      <div class="btns"><span class="btn r">红</span><span class="btn y">黄</span><span class="btn g">绿</span><span class="dpad"></span></div>
+      <p class="note">插队不单独成环节，随时打断；页眉变化 + 一次短振动（硬件）/ 手机震动（Demo）作为"打破预期"的信号。</p>
+    </div>
+    <div class="device"><div class="title">S4 · 错因诊断（红灯 / 拼错后）</div>
+      <div class="screen"><div class="hdr"><span>effect</span><span>错因</span></div>
+        <div class="line"><b>这个词你不会是因为？</b></div>
+        <span class="opt">1 完全没见过</span>
+        <span class="opt sel">2 和另一个词搞混了 → affect</span>
+        <span class="opt">3 知道意思但拼不出</span>
+        <span class="opt">4 知道但听不出发音</span>
+        <div class="prompt"><span>↑↓ 选择</span><span>绿 确认 · 红 跳过</span></div>
+      </div>
+      <div class="btns"><span class="btn r">红</span><span class="btn y">黄</span><span class="btn g">绿</span><span class="dpad"></span></div>
+      <p class="note">选 2 自动从近 14 天学过的形近/音近词中推荐候选；选 3 启用明天听写、后天填空；选 4 推送慢速拆音。</p>
+    </div>
+    <div class="device"><div class="title">S5 · 睡前战役（20:00 后首次开机）</div>
+      <div class="screen"><div class="hdr"><span>21:35</span><span>最后一场战斗</span></div>
+        <div class="line"><b>有 12 个词今天差点逃跑</b></div>
+        <div class="line muted">现在抓住它们，明天就不会忘 · 预计 8 分钟</div>
+        <div class="bar"><i style="width:0%"></i></div>
+        <div class="line">题型变形：中→英 · 拼写填空 · 听音选义</div>
+        <div class="line muted">今日已拯救高危词 22 · 新词筑坝 35（24h 存活率预计 91%）</div>
+        <div class="prompt"><span>← 明天再说</span><span>绿 开战</span></div>
+      </div>
+      <div class="btns"><span class="btn r">红</span><span class="btn y">黄</span><span class="btn g">绿</span><span class="dpad"></span></div>
+      <p class="note">内容 = 今日红灯词 ∪ 今晚队列 ∪ P(遗忘) 高的词；每词出题方式与早晨不同，避免模式识别。</p>
+    </div>
+    <div class="device"><div class="title">S6 · 周六 Boss 战 / 周日错词故事</div>
+      <div class="screen"><div class="hdr"><span>周六</span><span>本周战报</span></div>
+        <div class="line">打败遗忘：<b>217</b> 次</div>
+        <div class="line">高危词汇：<b>87</b> 个（等你收服）</div>
+        <div class="line">限时闯关 15 分钟 · 全对 60% 勇气勋章 / 100% 征服者皮肤</div>
+        <div class="line muted" style="margin-top:6px">周日：AI 把 abandon、effect… 编成一个故事读给你听</div>
+        <div class="prompt"><span>← 查看错词</span><span>绿 开始闯关</span></div>
+      </div>
+      <div class="btns"><span class="btn r">红</span><span class="btn y">黄</span><span class="btn g">绿</span><span class="dpad"></span></div>
+      <p class="note">Demo 中 Boss 战作为"防放弃"机制的最小版本；故事由后端 LLM 周五夜生成并预下发，离线可听。</p>
+    </div>
+    <div class="device"><div class="title">S7 · 实验后台（研究者用，网页）</div>
+      <div class="screen" style="background:var(--surface);color:var(--ink);border-color:var(--line);box-shadow:none">
+        <div class="hdr" style="border-color:var(--line)"><span>Cilie Lab</span><span>内测 32 人</span></div>
+        <div class="line">对照 FSRS：log loss 0.412 · AUC 0.71</div>
+        <div class="line">实验 RT-HLR：log loss <b>0.388</b> · AUC <b>0.74</b></div>
+        <div class="line muted">校准曲线 / 7 日留存 / 日均时长 / 阈值 τ 调节</div>
+        <div class="line muted">反应时分布 · 绿但慢占比 18%</div>
+        <div class="prompt"><span>导出 CSV</span><span>重跑评测</span></div>
+      </div>
+      <p class="note">示例数字仅为占位，用于说明看板内容。后台直接读 PostgreSQL，图表用 Jupyter 导出或轻量看板。</p>
+    </div>
+  </div>
+
+  <h3>3.2 单词状态机与队列</h3>
+  <figure>
+  <svg viewBox="0 0 980 320" role="img" aria-label="单词按键后进入不同队列：红灯进 5 分钟队列与今晚队列，黄灯进 30 分钟与今晚队列，绿灯快则按模型排期，绿灯慢进今晚队列">
+    <defs><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+    <g font-size="12" fill="currentColor" stroke="currentColor">
+      <rect x="20" y="120" width="130" height="60" rx="30" fill="none" stroke-width="1.5"/>
+      <text x="85" y="145" text-anchor="middle" stroke="none" font-weight="700">单词呈现</text>
+      <text x="85" y="163" text-anchor="middle" stroke="none" fill="var(--ink-3)" font-size="11">开始计时</text>
+      <line x1="150" y1="150" x2="220" y2="150" marker-end="url(#ar2)"/>
+      <rect x="220" y="110" width="130" height="80" rx="10" fill="none" stroke-width="1.5"/>
+      <text x="285" y="140" text-anchor="middle" stroke="none" font-weight="700">按键</text>
+      <text x="285" y="160" text-anchor="middle" stroke="none" fill="var(--ink-3)" font-size="11">记录 rating + rt_ms</text>
+      <text x="285" y="176" text-anchor="middle" stroke="none" fill="var(--ink-3)" font-size="11">写入 review_events</text>
+      <!-- branches -->
+      <line x1="350" y1="125" x2="470" y2="50" marker-end="url(#ar2)" stroke="var(--red)" stroke-width="2"/>
+      <text x="380" y="78" stroke="none" fill="var(--red)" font-size="11">红 不认识</text>
+      <line x1="350" y1="145" x2="470" y2="120" marker-end="url(#ar2)" stroke="var(--yellow)" stroke-width="2"/>
+      <text x="385" y="125" stroke="none" fill="var(--yellow)" font-size="11">黄 模糊</text>
+      <line x1="350" y1="160" x2="470" y2="190" marker-end="url(#ar2)" stroke="var(--green)" stroke-width="2"/>
+      <text x="372" y="190" stroke="none" fill="var(--green)" font-size="11">绿 · rt &gt; P75</text>
+      <line x1="350" y1="178" x2="470" y2="260" marker-end="url(#ar2)" stroke="var(--green)" stroke-width="2"/>
+      <text x="372" y="248" stroke="none" fill="var(--green)" font-size="11">绿 · rt ≤ P75</text>
+      <!-- queues -->
+      <rect x="470" y="30" width="190" height="40" rx="8" fill="none"/>
+      <text x="565" y="55" text-anchor="middle" stroke="none">5 分钟后重学 + 看释义</text>
+      <rect x="470" y="100" width="190" height="40" rx="8" fill="none"/>
+      <text x="565" y="125" text-anchor="middle" stroke="none">30 分钟后强制插入</text>
+      <rect x="470" y="170" width="190" height="40" rx="8" fill="none"/>
+      <text x="565" y="195" text-anchor="middle" stroke="none">标记"濒临遗忘"</text>
+      <rect x="470" y="240" width="190" height="40" rx="8" fill="none"/>
+      <text x="565" y="265" text-anchor="middle" stroke="none">模型排期（明天或更晚）</text>
+      <!-- tonight -->
+      <line x1="660" y1="50" x2="760" y2="120" marker-end="url(#ar2)"/>
+      <line x1="660" y1="120" x2="760" y2="135" marker-end="url(#ar2)"/>
+      <line x1="660" y1="190" x2="760" y2="150" marker-end="url(#ar2)"/>
+      <rect x="760" y="110" width="200" height="60" rx="10" fill="none" stroke="var(--accent)" stroke-width="2"/>
+      <text x="860" y="135" text-anchor="middle" stroke="none" font-weight="700" fill="var(--accent)">今晚队列（睡前战役）</text>
+      <text x="860" y="155" text-anchor="middle" stroke="none" fill="var(--ink-3)" font-size="11">题型变形，次日按模型重排</text>
+      <!-- interrupt loop -->
+      <path d="M860,170 L860,290 L85,290 L85,180" fill="none" stroke-dasharray="5 4" marker-end="url(#ar2)"/>
+      <text x="470" y="305" text-anchor="middle" stroke="none" fill="var(--ink-3)" font-size="11">任何时刻 P(遗忘) &gt; τ 的词都会以"老朋友"身份插队回到呈现环节</text>
+    </g>
+  </svg>
+  <figcaption>图 3-1 · 单词状态流转。红、黄、"绿但慢"三条路径都汇入今晚队列，这是与传统固定间隔算法的第一处可观察差异。</figcaption>
+  </figure>
+
+  <h3>3.3 交互规范（Demo 版）</h3>
+  <table>
+    <tr><th>项目</th><th>规范</th></tr>
+    <tr><td>反应时计时</td><td>单词文本绘制完成（requestAnimationFrame 回调后）开始计时；首次按键停止。rt 上限 15 s，超时按黄灯处理并记录 timeout。</td></tr>
+    <tr><td>按键映射</td><td>桌面：← 红 / ↓ 黄 / → 绿，↑ 发音；手机：底部三个 ≥ 64px 圆形按钮，颜色 + 文字双编码（色弱可辨）。</td></tr>
+    <tr><td>防误触</td><td>卡片切换后 250 ms 内忽略按键；连续同键 5 次弹出"认真答哦"提示并记录。</td></tr>
+    <tr><td>插队提示</td><td>页眉切换为"有个老朋友来看你"，手机震动 40 ms；不弹模态框，不打断节奏。</td></tr>
+    <tr><td>离线</td><td>所有学习动作在本地完成；联网时后台同步，失败静默重试；界面不显示网络状态。</td></tr>
+    <tr><td>可视化</td><td>进度以"遗忘曲线被拉平"的简笔动画表达，不显示原始分数；Demo 调试模式可显示 P(遗忘) 与 rt。</td></tr>
+    <tr><td>每日节律</td><td>早晨 / 30 分钟后 / 睡前三个 slot 由本地时间触发简报；Demo 通过系统通知或微信提醒（手动）承担硬件"开机"的作用。</td></tr>
+  </table>
+</section>
+
+<section id="plan" class="part">
+  <h2>④ 开发计划<small>ROADMAP</small></h2>
+
+  <h3>4.1 阶段划分（10 周）</h3>
+  <div class="gantt">
+  <table>
+    <tr><th style="width:230px">工作项</th><th>W1</th><th>W2</th><th>W3</th><th>W4</th><th>W5</th><th>W6</th><th>W7</th><th>W8</th><th>W9</th><th>W10</th></tr>
+    <tr><td><b>P0 数据与基线</b> 词库清洗、核心词标注、形近词表、公开数据集准备</td><td class="cell"><div class="b p0"></div></td><td class="cell"><div class="b p0"></div></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td><b>P1 算法</b> FSRS 基线、RT-HLR 实现、离线评测脚本（srs-benchmark 口径）</td><td></td><td class="cell"><div class="b p1"></div></td><td class="cell"><div class="b p1"></div></td><td class="cell"><div class="b p1"></div></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td><b>P2 客户端</b> PWA 学习流、三键与反应时采集、本地 SQLite、调度器</td><td></td><td class="cell"><div class="b p2"></div></td><td class="cell"><div class="b p2"></div></td><td class="cell"><div class="b p2"></div></td><td class="cell"><div class="b p2"></div></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td><b>P3 后端与内容</b> 同步 API、训练服务、LLM 例句/故事、TTS 批量、实验后台</td><td></td><td></td><td></td><td class="cell"><div class="b p3"></div></td><td class="cell"><div class="b p3"></div></td><td class="cell"><div class="b p3"></div></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td><b>M1 内部可用版</b></td><td></td><td></td><td></td><td></td><td></td><td class="cell"><div class="ms"></div></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td><b>P4 内测与实验</b> 30～60 名初二～高一学生，A/B 分组 3 周</td><td></td><td></td><td></td><td></td><td></td><td class="cell"><div class="b p4"></div></td><td class="cell"><div class="b p4"></div></td><td class="cell"><div class="b p4"></div></td><td class="cell"><div class="b p4"></div></td><td></td></tr>
+    <tr><td><b>P5 分析与决策</b> 评测报告、付费意愿访谈、硬件启动建议</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="cell"><div class="b p5"></div></td><td class="cell"><div class="b p5"></div></td></tr>
+    <tr><td><b>M2 验证结论</b></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="cell"><div class="ms"></div></td></tr>
+  </table>
+  </div>
+  <div class="legend"><span><i style="background:var(--c4)"></i>数据</span><span><i style="background:var(--c1)"></i>算法 / 实验</span><span><i style="background:var(--c2)"></i>客户端 / 分析</span><span><i style="background:var(--c3)"></i>后端</span><span><i style="background:var(--red);transform:rotate(45deg);width:10px;height:10px"></i>里程碑</span></div>
+
+  <h3>4.2 各阶段交付与验收</h3>
+  <table>
+    <tr><th>阶段</th><th>周</th><th>交付物</th><th>验收标准</th></tr>
+    <tr><td>P0 数据与基线</td><td>W1–2</td><td>清洗后的词库（≥1600 中考核心词，含释义/音标/例句/词频/核心标记）、形近词表、Kokoro 音频；anki-revlogs-10k（含 duration）与 Duolingo HLR 数据集的评测加载器（先申请数据用途）</td><td>词条抽检准确率 ≥ 98%；评测脚本能在公开数据上复现 srs-benchmark 的 FSRS 基线指标</td></tr>
+    <tr><td>P1 算法</td><td>W2–4</td><td>ts-fsrs 集成；SM-2、HLR 原版、RT-HLR 的 Python 训练 + TS 推理；离线评测 Notebook（log loss 主指标 / AUC / RMSE(bins) / ECE 校准 / 按用户配对 Wilcoxon）；调度层仿真</td><td>在 anki-revlogs-10k 上输出 RT-HLR vs HLR vs FSRS 对比表并给出功效分析（内测需要的样本量）</td></tr>
+    <tr><td>P2 客户端</td><td>W2–5</td><td>PWA：S1–S6 界面、三键与反应时采集、本地 SQLite、调度器、离线同步</td><td>断网完整学习 30 分钟不丢数据；反应时误差 &lt; 20 ms（用自动化按键脚本校验）</td></tr>
+    <tr><td>P3 后端与内容</td><td>W4–6</td><td>同步 API、每夜训练任务、LLM 内容生成与审核、TTS 音频、实验后台 S7</td><td>例句生成通过 50 条人工抽检（难度/合规）；训练任务可下发个性化参数</td></tr>
+    <tr><td>P4 内测与实验</td><td>W6–9</td><td>30～60 名学生，随机分组（FSRS vs RT-HLR），每日三 slot 学习</td><td>人均 ≥ 15 天有效数据；每日崩溃率 &lt; 1%</td></tr>
+    <tr><td>P5 分析与决策</td><td>W9–10</td><td>验证报告（H1–H3）、用户访谈纪要、硬件立项建议与 BOM 方向</td><td>给出"继续 / 调整 / 停止"的明确结论</td></tr>
+  </table>
+
+  <h3>4.3 人员与分工</h3>
+  <div class="grid">
+    <div class="card"><b>算法 / 数据（1 人）</b><p>P0 词库清洗，P1 两组模型与评测，P5 分析报告。需熟悉 Python、FSRS 生态。</p></div>
+    <div class="card"><b>前端（1 人）</b><p>P2 全部，P4 内测支持。需熟悉 React/TS、IndexedDB/SQLite-wasm、PWA。</p></div>
+    <div class="card"><b>后端兼数据工程（1 人，可与算法合并为 1.5 人）</b><p>P3 同步 API、训练任务编排、LLM/TTS 流水线、实验后台。</p></div>
+    <div class="card"><b>产品兼内容（Ben + 0.5 人）</b><p>提示词设计、生成内容审核、内测招募与访谈、硬件体验对比（百词斩 mini/max）。</p></div>
+  </div>
+
+  <h3>4.4 验证指标</h3>
+  <table>
+    <tr><th>假设</th><th>指标</th><th>通过线（建议）</th></tr>
+    <tr><td>H1 预测更准</td><td>实验组 vs 对照组 log loss、AUC、校准误差（按同一用户的留出复习）</td><td>log loss 相对降低 ≥ 5%，且校准曲线无系统性偏差</td></tr>
+    <tr><td>H2 留存更好</td><td>7 日延迟测试正确率（随机抽 50 词）；单位学习时长的"拯救词数"</td><td>实验组延迟测试正确率高 ≥ 5 个百分点（同时长）</td></tr>
+    <tr><td>H3 交互可接受</td><td>日均学习时长、三 slot 完成率、14 天留存、主观打扰度问卷</td><td>14 天留存 ≥ 60%，插队打扰度评分 ≤ 2/5</td></tr>
+    <tr><td>H4 硬件价值 / 付费</td><td>访谈：手机 vs 独立设备偏好；家长付费意愿（价格阶梯）</td><td>≥ 50% 家长表示愿为"无手机"形态付费 ≥ 299 元</td></tr>
+  </table>
+
+  <h3>4.5 风险与对策</h3>
+  <table>
+    <tr><th>风险</th><th>影响</th><th>对策</th></tr>
+    <tr><td>内测数据量不足以拟合个性化参数；RT 边际增益很小</td><td>H1 结论不可靠</td><td>先用 anki-revlogs-10k 做群体级验证并做功效分析；RT-HLR 采用群体参数 + 少量用户项；延长内测而非扩大功能</td></tr>
+    <tr><td>评测数据语义不一致（Anki duration 含阅读时间）</td><td>公开数据增益不迁移</td><td>公开数据只定方向，结论以自有三键 RT 日志复验为准；保留随机化对照流量避免插队带来的选择偏差</td></tr>
+    <tr><td>反应时噪声大（设备差异、分心）</td><td>特征失效</td><td>用户内 z 分数归一化；剔除 &lt; 300 ms 与 &gt; 15 s；记录设备类型</td></tr>
+    <tr><td>学生为了"快"而乱按绿灯</td><td>数据污染、假记忆</td><td>睡前战役用变形题型做校验；连续快绿后随机抽查中→英拼写</td></tr>
+    <tr><td>LLM 生成内容不当或难度不符</td><td>合规与体验</td><td>后端生成 + 审核 + 缓存，不在客户端实时调用；提示词限定词表难度；人工抽检</td></tr>
+    <tr><td>数据与代码许可</td><td>商用受限</td><td>Demo 用 ECDICT（MIT）、Tatoeba（CC BY）、Kokoro（Apache）等许可友好件；不碰 kajweb/dict、有道音频、XTTS；AGPL/GPL 项目只参考；研究数据集不进产品</td></tr>
+    <tr><td>未成年人数据合规</td><td>法律风险</td><td>监护人知情同意、最小化采集、境内存储；生成内容三道检查后入库，不在学生端实时调用 LLM</td></tr>
+    <tr><td>硬件过早投入</td><td>资源浪费</td><td>M2 前不启动硬件设计，只做竞品拆机与供应链访谈</td></tr>
+  </table>
+
+  <h3>4.6 M2 之后的路线（供参考）</h3>
+  <ol>
+    <li><b>硬件原型（+8 周）</b>：ESP32-S3 + 4.2″ 墨水屏 + 7 键的 EVT 样机，复用客户端调度器的逻辑（移植为 C/Rust），仅做同步与 OTA 联网。</li>
+    <li><b>内容扩展</b>：覆盖高考 3500 词与考频标注，真人发音采购，形近词与词根词缀体系。</li>
+    <li><b>家长端与商业化</b>：周报推送、付费订阅内容包、寒暑假特攻营。</li>
+  </ol>
+</section>
+
+<footer>
+  本文件为本地自包含 HTML，无外部依赖；可直接用浏览器打开或打印为 PDF。来源：cilie.pdf 构想稿、三份子任务调研、公开开源仓库（链接见第 ① 部分，数据以调研时间为准）。
+</footer>
+</div>
+</body>
+</html>
