@@ -80,6 +80,16 @@ dl{margin:8px 0}
 dt{font-weight:600;margin-top:8px}
 dd{margin:0 0 4px 0;color:var(--ink-2)}
 footer{margin-top:60px;color:var(--ink-3);font-size:13px;border-top:1px solid var(--line);padding-top:16px}
+
+.tie{display:inline-block;font-size:12px;font-weight:400;color:var(--ink-3);border:1px solid var(--line);border-radius:4px;padding:0 5px;margin-left:6px;line-height:1.5}
+.ask{margin:10px 0;padding-left:12px;border-left:3px solid var(--line)}
+.ask b{display:block;font-size:13px;color:var(--ink-3);letter-spacing:1px;font-weight:600}
+.read{font-size:14px;color:var(--ink-2);background:var(--surface);border:1px dashed var(--line);border-radius:8px;padding:8px 12px;margin:10px 0}
+.read b{color:var(--ink)}
+ol.steps li{margin:10px 0}
+.key{display:inline-block;width:.85em;height:.85em;border-radius:50%;vertical-align:-1px;margin-right:5px}
+.key.r{background:var(--red)}.key.y{background:var(--yellow)}.key.g{background:var(--green)}
+.note{color:var(--ink-3);font-size:14px}
 .site-tabs{display:flex;gap:0;margin:18px 0 0;border-bottom:2px solid var(--line)}
 .site-tabs a{flex:1;text-decoration:none;color:var(--ink-3);padding:12px 16px 10px;border-bottom:3px solid transparent;margin-bottom:-2px;font-size:16px;font-weight:600;line-height:1.3}
 .site-tabs a small{display:block;font-size:12px;font-weight:400;color:var(--ink-3);margin-top:3px}
@@ -95,154 +105,268 @@ footer{margin-top:60px;color:var(--ink-3);font-size:13px;border-top:1px solid va
   <a href="./">一、方案<small>调研 · 架构 · 原型 · 开发计划 · 2026-11-04</small></a>
   <a href="./demo.html" class="on">二、Demo 初步研发与测试<small>五模块 · 模拟环境 · 六轮实验 · 2026-11-10</small></a>
 </nav>
-
 <header class="hero">
   <h1>词猎 Demo 阶段报告</h1>
-  <p class="sub">Demo 做完了，模拟环境跑了六轮实验。结论：算法上拿不出「同样时间记得更多」的证据。五条优化路线里两条成立、两条被否，剩下一条只有真人能回答。</p>
-  <div class="meta">2026-11-10 更新 · 仓库 Cilie，提交 15114a2 · 本文是给决策用的汇总，数字出处在仓库 docs/sim-results/ 六份结果文件</div>
+  <p class="sub">词猎是一台给初高中生背单词的设备。我们先做出了它的软件版，又造了 30 个假学生，替真人试用了 90 天。结果：最初想靠算法取胜的几个点，都没能证明比现成的免费算法更好。算法该怎么定已经清楚，剩下的问题要找真人来答。</p>
+  <div class="meta">2026-11-10 更新 · 六轮实验 · 数字的出处和复现办法在文末附录</div>
 </header>
 
 <nav class="toc">
-  <a href="#s0">一句话结论</a>
-  <a href="#s1">做了什么</a>
-  <a href="#s2">模拟环境</a>
+  <a href="#s0">结论</a>
+  <a href="#sp">先认识产品</a>
+  <a href="#s2">怎么测的</a>
+  <a href="#sj">怎么算好</a>
   <a href="#s3">前三轮：找原因</a>
-  <a href="#s3b">后三轮：试优化</a>
+  <a href="#s3b">后三轮：试改法</a>
   <a href="#s4">对产品意味着什么</a>
   <a href="#s5">局限</a>
   <a href="#s6">下一步怎么选</a>
+  <a href="#s1">Demo 做了什么</a>
   <a href="#s8">指标与名词</a>
   <a href="#s7">附录</a>
 </nav>
 
 <!-- ========== 0 ========== -->
 <section class="part" id="s0">
-  <h2>一句话结论<small>先看这里</small></h2>
+  <h2>结论<small>只读这一节也够</small></h2>
 
   <div class="callout bad">
-    <strong>设想里的三个卖点，反应时、更好的记忆模型、风险插队，在独立裁判下都没有显示出「同样题量记得更多」。</strong>
-    目前能站住的只有「多做题多记词」。而这一点，用开源的 FSRS 把目标记忆率调高就能做到，成本更低。
+    <strong>最初想靠算法取胜的四个点，没有一个能证明「同样的题量记得更多」。</strong>
+    目前站得住的只有「多做题就多记词」。而这一点，把现成的免费算法调勤一档就能做到。
   </div>
 
-  <div class="grid">
-    <div class="card">
-      <div class="big">≈ 0 <small>反应时的贡献</small></div>
-      <p>把反应时信号关掉再跑一遍，实验组的领先几乎不变。两种裁判下都是这样。</p>
-    </div>
-    <div class="card">
-      <div class="big">+38% <small>实验组每天多做的题</small></div>
-      <p>实验组多记的词，几乎全部来自换记忆模型这一步。但这一步同时让每天题量多了四成。</p>
-    </div>
-    <div class="card">
-      <div class="big">−107 / −152 <small>同题量下 HLR 比 FSRS 少记的核心词</small></div>
-      <p>题量拉齐后，在独立裁判下，我们的 HLR 模型反而比对照组 FSRS 记得少。</p>
-    </div>
-  </div>
+  <h3>事情的经过，四句话</h3>
+  <ol class="steps">
+    <li><strong>设想。</strong>词猎原本想靠四样聪明办法取胜。最看重的一样叫反应时，也就是学生从看到词到按键用了多久。按得慢，说明记得不牢，该早点复习。</li>
+    <li><strong>测法。</strong>我们造了 30 个假学生。同一个假学生，先用我们的办法学 90 天，再用现成的免费算法学 90 天，比哪次记住的词多。</li>
+    <li><strong>第一眼赢了，细查输了。</strong>我们的办法多记了约一成的词。可这是靠让学生每天多做三成多的题换来的。让两边做一样多的题再比，我们反而少记两到三成。</li>
+    <li><strong>又试了三种改法。</strong>两种没用。一种看起来能留住学生，但要找真人来确认。</li>
+  </ol>
 
-  <h3>随后试了三条优化路线</h3>
-  <p>前三轮找到了原因，后三轮每轮试一个改法。骨架都换回 FSRS，每轮只动一样东西。</p>
-
-  <div class="grid">
-    <div class="card">
-      <div class="big">≈ 0 <small>反应时改进评分后的贡献</small></div>
-      <p>第四轮。让反应时把绿灯再细分成轻松、正常、勉强三档。同题量下和纯 FSRS 打平。<span class="tag lo">被否</span></p>
-    </div>
-    <div class="card">
-      <div class="big">−60 到 −90 <small>按时间预算挑题，同题量少记的核心词</small></div>
-      <p>第五轮。每次挑「这几分钟最划算」的词。独立裁判下明显不如到期就复习。<span class="tag lo">被否</span></p>
-    </div>
-    <div class="card">
-      <div class="big">+0.04 / +0.13 <small>每天固定题数，坚持度的提升</small></div>
-      <p>第六轮。只封顶不留人。补足到固定题数能留人，但靠的是模型里的一条假设。<span class="tag mid">要真人验证</span></p>
-    </div>
-  </div>
-
-  <p><strong>好消息有三个。</strong>第一，Demo 四个模块全部做完、联调通过，可以直接拿去真人内测。第二，算法该怎么定已经清楚：用 FSRS，按到期复习，目标记忆率从 0.90 提到 0.93。第三，模拟环境本身工作正常。六轮下来它每次都推翻了上一轮的乐观解读，说明它在替我们挑毛病，不是在自我证明。</p>
-</section>
-
-<!-- ========== 1 ========== -->
-<section class="part" id="s1">
-  <h2>做了什么<small>Demo + 模拟环境，两天内完成</small></h2>
-
+  <h3>四个设想各自的结果</h3>
   <table>
-    <thead><tr><th>模块</th><th>干什么</th><th>规模</th><th>测试</th></tr></thead>
+    <thead><tr><th>最初的设想</th><th>测下来</th><th>结论</th></tr></thead>
     <tbody>
-      <tr><td><strong>词库流水线</strong><br><span class="tag">data</span></td><td>从开源词典 ECDICT 和例句库 Tatoeba 生成初高中词库，分层、标频率、找形近词。全量 15 秒可重建。</td><td class="num">约 2100 行</td><td class="num">31</td></tr>
-      <tr><td><strong>算法库</strong><br><span class="tag">algo</span></td><td>四个记忆模型（SM-2、HLR、带反应时的 RT-HLR、FSRS-6）、参数拟合、评测、合成数据。网页端的实现按这里的 16 组向量逐一对齐。</td><td class="num">约 2300 行</td><td class="num">38</td></tr>
-      <tr><td><strong>网页端</strong><br><span class="tag">web</span></td><td>可安装到手机的离线网页应用。三键作答（红/黄/绿）、记反应时、本地调度、离线事件日志、同步。七个界面，含调试面板。</td><td class="num">约 4900 行</td><td class="num">113</td></tr>
-      <tr><td><strong>服务端</strong><br><span class="tag">server</span></td><td>收事件、下发模型参数和词库、批量生成例句和发音（可接大模型，没有就走模板）、实验后台页。</td><td class="num">约 2500 行</td><td class="num">39</td></tr>
-      <tr><td><strong>模拟环境</strong><br><span class="tag">sim</span></td><td>虚拟时钟 + 模拟学生 + 指标 + 报告，直接驱动网页端的真实调度代码。详见下一节。</td><td class="num">约 5800 行</td><td class="num">90</td></tr>
+      <tr><td><strong>用反应时判断记得牢不牢</strong></td><td>试了两种用法。有它没它，结果一样。</td><td><span class="tag lo">没用</span></td></tr>
+      <tr><td><strong>自己的记忆模型</strong></td><td>多记的词是多做题换来的。题量一样时，不如现成的免费算法。</td><td><span class="tag lo">不成立</span></td></tr>
+      <tr><td><strong>快忘了就插队复习</strong></td><td>没多记住词，还打断了正常学习。</td><td><span class="tag lo">没用</span></td></tr>
+      <tr><td><strong>按了绿但按得慢，睡前再练一遍</strong></td><td>学生更容易放弃。</td><td><span class="tag lo">有害</span></td></tr>
     </tbody>
   </table>
 
-  <p>五个模块共 311 个自动测试，全部通过。接口格式只有一份约定文档，四个模块都照它写，联调时没有出现接口对不上的问题。</p>
+  <div class="grid">
+    <div class="callout bad" style="margin:0">
+      <strong>坏消息</strong>
+      <p>算法上，词猎比不过一个调好的免费算法。它的特别之处只剩设备形态、专注体验、每天任务的仪式感、面向初高中的内容。这几样假学生测不了。</p>
+    </div>
+    <div class="callout" style="margin:0">
+      <strong>好消息</strong>
+      <ul>
+        <li>软件版做完了，可以直接拿给真人试。</li>
+        <li>算法怎么定已经清楚：用现成的免费算法，复习调勤一档。</li>
+        <li>测试台好用。找真人之前，它就帮我们排除了五个原本看好的想法。</li>
+      </ul>
+    </div>
+  </div>
+
+  <p><strong>下一步</strong>：先把算法定下来。再找真人分三组，试「每天固定任务量」能不能留住学生。具体见<a href="#s6">下一步怎么选</a>。</p>
+  <p class="note">想知道凭什么这么说，接着往下读。前三节是背景：产品是什么，怎么测的，怎么算好。之后是六轮实验的细节。</p>
+</section>
+
+<!-- ========== p ========== -->
+<section class="part" id="sp">
+  <h2>先认识产品<small>词猎是什么，原本想靠什么取胜</small></h2>
+
+  <p><strong>词猎是一台给初高中生背英语单词的小设备。</strong>屏幕上出一个词，学生在心里回忆它的意思，然后按三个键里的一个。</p>
+
+  <div class="grid">
+    <div class="card"><h3 style="margin-top:0"><span class="key r"></span>红键</h3><p>不认识。</p></div>
+    <div class="card"><h3 style="margin-top:0"><span class="key y"></span>黄键</h3><p>有点模糊。</p></div>
+    <div class="card"><h3 style="margin-top:0"><span class="key g"></span>绿键</h3><p>认识。</p></div>
+  </div>
+
+  <p>设备还会顺手记下一件事：从词出现到按键，用了多久。这叫<strong>反应时</strong>。</p>
+  <p>硬件还没做。这次做出来的是能装在手机上的软件版，功能一样。下文叫它 Demo。</p>
+
+  <h3>背单词产品比的是什么</h3>
+  <p>所有背词产品都要回答同一个问题：今天该复习哪些词。复习早了，词还记得很牢，白花时间。复习晚了，已经忘了，等于重学。</p>
+  <p>管这件事的那段程序叫<strong>调度算法</strong>，也就是替学生排复习日程的程序。一个背词产品聪不聪明，主要看它。</p>
+  <p>现成的答案叫 <strong>FSRS</strong>。它是一个公开、免费的调度算法，常见的背词软件 Anki 已经内置了它，谁都能直接拿来用。所以词猎的算法要有价值，就得比它强。</p>
+
+  <h3>最初的设想：四样别人没有的东西</h3>
+  <table>
+    <thead><tr><th>设想</th><th>具体怎么做</th><th>当初为什么觉得有用</th></tr></thead>
+    <tbody>
+      <tr><td><strong>用上反应时</strong></td><td>按了绿，但想了很久才按，就当成「会了但不牢」。</td><td>只看对错发现不了这种词。看快慢能早一步发现。</td></tr>
+      <tr><td><strong>自己的记忆模型</strong></td><td>给每个词估一个半衰期，也就是把握掉到一半要多少天。它的底子是多邻国公开的一个模型，叫 HLR，我们往里加了反应时。</td><td>估得更准，复习就排得更准。</td></tr>
+      <tr><td><strong>风险插队</strong></td><td>估计某个词忘掉的可能超过三成，就不等排好的日子，马上插进来复习。</td><td>抢在忘掉之前救回来。</td></tr>
+      <tr><td><strong>绿但慢，睡前再练</strong></td><td>当天按了绿、但比自己平时慢的词，睡前再过一遍。</td><td>给不牢的词多一次巩固。</td></tr>
+    </tbody>
+  </table>
 
   <div class="callout">
-    <strong>一个在联调中发现并修掉的产品问题。</strong>按词频从高到低出新词，第一批会是 the、be、and、of 这种学生早就会的词。现在改成按学段设一个起点，初中从第 600 个常用词附近开始，高中从第 1500 个附近开始，再按学生实际会的比例上下调。
+    <strong>记住两个叫法，后面一直用。</strong>
+    <p><strong>对照组</strong>：只用 FSRS，上面四样都不加。它代表「现成的免费方案」。</p>
+    <p><strong>实验组</strong>：四样全用上。它代表「词猎最初的完整设想」。</p>
+    <p>整份报告就是在比这两组，以及后来想到的几种改法。下文说「我们的模型」，指的就是第二样。</p>
   </div>
+
+  <h3>一个后面反复用到的旋钮</h3>
+  <p>FSRS 和我们的模型都有一个旋钮，叫<strong>目标记忆率</strong>。它定的是：等学生对一个词的把握掉到多少时，安排复习。</p>
+  <p>比如设成 0.90，就是掉到九成把握时复习。调高到 0.95，复习来得更早、更勤，每天的题变多，记得也更牢。调低则相反。后面多次用它来增减题量。</p>
 </section>
 
 <!-- ========== 2 ========== -->
 <section class="part" id="s2">
-  <h2>模拟环境<small>它是什么，为什么它的话可以听</small></h2>
+  <h2>怎么测的<small>假学生加真产品，一步一步说</small></h2>
 
-  <p><strong>它是一个「假学生 + 真产品」的测试台。</strong>假学生有自己的记忆（脑子里每个词现在到底记得多牢）、作答习惯（会不会手滑、什么时候犯懒）、心理状态（动机、挫败、无聊、疲劳、自信、焦虑六项）。产品那一侧，跑的是网页端线上会上线的同一份调度代码，不是另写的复刻。</p>
+  <p><strong>办法是造一批假学生，让他们用真的产品学 90 天。</strong>找真人测一轮要几个月，而且打不开脑子，看不到他到底记住没有。假学生两样都能解决。</p>
+
+  <h3>一次实验的六步</h3>
+  <ol class="steps">
+    <li><strong>造 30 个假学生。</strong>一共六种类型：稳扎稳打型、三分钟热度型、基础弱型、尖子型、考前突击型、家长盯着型。每种造 5 个。每个假学生是一段程序，带着三样东西：脑子里的记忆，作答的习惯，每天的心情。</li>
+    <li><strong>给每个假学生装一位裁判。</strong>裁判，也就是假学生脑子里那套「学一次能记多牢、每天忘掉多少」的规则。产品看不到它，只能像面对真人一样，靠学生按了哪个键、用了多久去猜。我们却能随时打开来看，所以叫它裁判。</li>
+    <li><strong>让假学生用产品学 90 天。</strong>每天，假学生按自己的劲头决定学不学。学的话，产品出词，假学生照脑子里的记忆作答：记得牢就按绿，而且按得快。记不清就按黄或红。偶尔也会手滑。产品收到按键，排下一次复习。</li>
+    <li><strong>心情跟着变。</strong>错得多会挫败，题太多会累，太简单会无聊，答对多会更有信心。劲头连续两周都很低，这个假学生就不学了，记作<strong>流失</strong>。</li>
+    <li><strong>同一个假学生换一种做法，再来一遍。</strong>回到第 1 天。同一个人，同一批词，同样的起点，同样的运气，只把产品的做法换掉。这样两次结果有差别，只能是做法造成的。</li>
+    <li><strong>第 90 天收卷，算差。</strong>打开裁判，数这个假学生记住了多少词。再看他做了多少题，还在不在学。同一个假学生的两次结果相减，30 个假学生取平均。</li>
+  </ol>
 
   <div class="grid">
     <div class="card">
-      <h3 style="margin-top:0">可调时间流速</h3>
-      <p>一年的学习几十秒跑完。可以看第 7、30、90、180、365 天的结果。</p>
+      <h3 style="margin-top:0">产品这一侧是真的</h3>
+      <p>第 3 步里出词、排复习的，就是 Demo 里实际在跑的那份程序，不是另写的仿制品。所以这里发现的问题，就是真产品的问题。</p>
     </div>
     <div class="card">
-      <h3 style="margin-top:0">六种学生</h3>
-      <p>稳扎稳打型、三分钟热度型、基础弱型、尖子型、考前突击型、家长盯着型。每种各跑 5 个随机种子。</p>
-    </div>
-    <div class="card">
-      <h3 style="margin-top:0">两位裁判</h3>
-      <p>裁判，也就是假学生脑子里「真实记忆」的算法。一位是 HLR 家族（和我们的模型同源，有主场优势），一位是认知心理学的 ACT-R 模型（独立第三方）。两位都同意才算数。</p>
-    </div>
-    <div class="card">
-      <h3 style="margin-top:0">同一个学生比两次</h3>
-      <p>对照组和实验组用的是同一个假学生、同一批词、同一个起点。差异只能来自产品本身。</p>
+      <h3 style="margin-top:0">时间是快进的</h3>
+      <p>一年的学习，电脑不到一分钟就能跑完。所以能反复试，换一种做法再来一遍也不费事。</p>
     </div>
   </div>
 
-  <h3>看哪几个数</h3>
-  <dl>
-    <dt>记住的核心词</dt><dd>第 90 天时，裁判判定 30 天后还记得的核心词有几个。这是主指标。</dd>
-    <dt>坚持度</dt><dd>学生有没有继续学。流失的学生记多少词都没意义。</dd>
-    <dt>新词 7 天记住率</dt><dd>新学的词过了 7 天还记得的比例。看新词有没有被及时接住。</dd>
-    <dt>每天题量</dt><dd>每个活跃日答了几题。这是学生付出的成本。</dd>
-    <dt>白复习占比</dt><dd>复习时这个词本来就记得很牢的比例。越高越浪费时间。</dd>
-    <dt>预测误差</dt><dd>产品说「这个词 70% 会忘」，实际忘的比例和 70% 差多少。</dd>
-  </dl>
-  <p>每个数具体怎么算、报告里的专业名词是什么意思，都放在<a href="#s8">指标与名词</a>一节。</p>
+  <h3>为什么要两位裁判</h3>
+  <p>裁判按什么规则忘词，是我们写进去的。写偏了，结论就跟着偏。所以准备了两位，规则完全不同。</p>
+  <div class="grid">
+    <div class="card">
+      <h3 style="margin-top:0">独立裁判</h3>
+      <p>用的是认知心理学里的一套记忆理论，叫 ACT-R。它和我们的模型没关系，和 FSRS 也没关系，谁也不占便宜。</p>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">同源裁判</h3>
+      <p>用的公式和我们的模型是同一套。我们的模型去猜它，等于开卷考试，成绩会偏高。</p>
+    </div>
+  </div>
+  <p><strong>两位意见一致时，结论最稳。意见相反时，听独立裁判的。</strong>因为同源裁判天然偏向我们自己。</p>
+
+  <h3>每轮实验是怎么来的</h3>
+  <p>每一轮的结果出来，我们先不信它，找一个可能推翻它的检查，再跑一轮。比如第一轮看到实验组领先，第二轮就去查领先是谁带来的，第三轮再查这份领先是不是多做题换的。六轮就是这样一轮追一轮追出来的。</p>
+
+  <h3>假学生答不了的问题</h3>
+  <ul>
+    <li>设备拿在手里好不好用，能不能让人专心。</li>
+    <li>「今天的任务做完了」带来的满足感。假学生没有这项设定。</li>
+    <li>真人按键的快慢里，到底藏着多少「记得牢不牢」的信息。模拟里这层关系是我们自己设的。</li>
+  </ul>
 
   <div class="callout">
-    <strong>为什么说它不是自娱自乐。</strong>一，被测的是真代码，模拟里发现的问题就是线上会有的问题，比如新词从 the 开始、比如一年模拟暴露出调度器每题重载词表的性能问题。二，裁判是独立的，我们的模型猜不到它。三，它六轮都在推翻我们自己的乐观解读，见下面两节。一个只会说好话的环境才是自娱自乐。
+    <strong>为什么说它不是自娱自乐。</strong>一，被测的是真程序。比如它发现新词会从 the、be 这种谁都会的词教起，这个问题已经修掉。二，裁判是独立的，我们的模型猜不到它的规则。三，它没有顺着我们说好话。六轮下来，它否掉了五个我们原本看好的想法。只会说好话的环境才是自娱自乐。
   </div>
+</section>
+
+<!-- ========== j ========== -->
+<section class="part" id="sj">
+  <h2>怎么算好，怎么算不好<small>先把规矩说清，再看结果</small></h2>
+
+  <h3>每个数朝哪边算好</h3>
+  <table>
+    <thead><tr><th>看的数</th><th>它说的是什么</th><th>哪边好</th><th class="num">对照组的水平</th></tr></thead>
+    <tbody>
+      <tr><td><strong>记住的核心词</strong><br><span class="tag hi">主要看</span></td><td>第 90 天时，就算从此不再复习，30 天后仍然记得的核心词有几个。核心词是词库里最该掌握的 1600 个。</td><td>越多越好</td><td class="num">331 / 853 个</td></tr>
+      <tr><td><strong>坚持度</strong><br><span class="tag hi">主要看</span></td><td>学生还在不在学。0 到 1 的分数。天天来、劲头足，接近 1。中途放弃，分数就低。</td><td>越高越好</td><td class="num">0.92 / 0.65</td></tr>
+      <tr><td>新词 7 天记住率</td><td>新学的词过了 7 天还记得的比例。</td><td>越高越好</td><td class="num">90% / 51%</td></tr>
+      <tr><td>流失日</td><td>学生在第几天放弃。90 天都没放弃的记第 91 天。</td><td>越晚越好</td><td class="num">第 88 / 74 天</td></tr>
+      <tr><td>每天题量</td><td>学的那天做了多少题。这是学生付出的成本。</td><td>记住一样多时，越少越好</td><td class="num">121 / 119 题</td></tr>
+      <tr><td>白复习占比</td><td>复习的时候，这个词其实还记得很牢。这样的复习占多少。</td><td>越低越好</td><td class="num">21% / 18%</td></tr>
+      <tr><td>预测误差</td><td>产品估「这题有七成把握答对」，实际答对的比例和七成差多少。</td><td>越低越好，0 最准</td><td class="num">0.04 / 0.11</td></tr>
+      <tr><td>打断率</td><td>插队进来的题占多少。</td><td>越低越好</td><td class="num">0</td></tr>
+    </tbody>
+  </table>
+  <p class="note">最后一列有两个数时，前一个是独立裁判给的，后一个是同源裁判给的。两位裁判对「记得」划的线不一样。独立裁判要求 30 天后还有九成把握，同源裁判只要求五成。所以两位裁判的数不能互相比，只能在同一位裁判下比两种做法。</p>
+
+  <h3>差多少算多</h3>
+  <p>事先没有定「多几个词才算数」的线。读的时候可以拿对照组当尺子。</p>
+  <p>比如独立裁判下，对照组记住 331 个核心词。多 35 个约是多一成，多 100 个约是多三成。坚持度满分是 1，对照组是 0.92，掉 0.09 就是掉了一成。</p>
+
+  <h3>一种做法要过四关，才算好</h3>
+  <ol class="steps">
+    <li><strong>看对的数。</strong>定输赢只看两个：记住的核心词，坚持度。其他数用来解释原因。这条是实验开始前就写下的。</li>
+    <li><strong>差距不能是运气。</strong>30 个假学生，每人有一个「新做法减老做法」的差。从这 30 个差里反复随机抽样，重算 2000 次平均。绝大多数结果都落在零的同一边，才算真有差距。否则记作<strong>平手</strong>，意思是换一批学生，结果可能就反过来。这条也是实验开始前写下的。</li>
+    <li><strong>题量要拉齐。</strong>多做题当然多记词，这不算本事。所以要让两边每天做一样多的题再比。或者看另一个数：每多做 100 题，能多记几个词。这条是第二轮之后加的，因为那时才发现实验组的领先是多做题换来的。</li>
+    <li><strong>独立裁判得点头。</strong>两位裁判都说好，最稳。只有同源裁判说好，不算。这条是做第一轮时加的。</li>
+  </ol>
+  <p>另外有一条底线：<strong>不能把学生赶跑</strong>。词记得再多，坚持度明显下降也算不好。流失的学生，记多少词都没有意义。</p>
+
+  <h3>三种结局</h3>
+  <table>
+    <thead><tr><th>结局</th><th>什么情况</th><th>这次的例子</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag hi">采纳</span></td><td>独立裁判下，题量拉齐后明显更好，坚持度没有变差。</td><td>排复习改用 FSRS。题量拉齐后，它比我们的模型多记 107 到 152 个核心词。</td></tr>
+      <tr><td><span class="tag lo">被否</span></td><td>题量拉齐后是平手，或者更差。或者坚持度明显下降。</td><td>睡前再练。坚持度掉了 0.09 到 0.14。</td></tr>
+      <tr><td><span class="tag mid">交给真人</span></td><td>结果好不好，取决于假学生身上的某条设定，而这条设定我们自己也没把握。</td><td>每天固定题数。它能留人，靠的是「答对多就更有劲」这条设定。</td></tr>
+    </tbody>
+  </table>
+
+  <h3>举个例子：同一个结果，先过关后翻车</h3>
+  <p>第一轮，实验组比对照组多记 35 个核心词，差距不是运气。第二关过了。</p>
+  <p>第二轮发现，多记的词来自换模型这一步，而这一步让学生每天多做约四成的题。第三关没过。</p>
+  <p>第三轮把题量拉齐重比，我们的模型反而少记 107 个。结论从「好」变成了「不好」。</p>
+
+  <h3>读表的四条约定</h3>
+  <ul>
+    <li><strong>表里的数都是两种做法相减。</strong>表头会写清谁减谁。</li>
+    <li><strong>看颜色比看正负号直接。</strong><span class="pos">绿色</span>是变好，<span class="neg">红色</span>是变坏，<span class="zero">灰色</span>是平手或接近零。比如每天多做 46 题，数是正的，但对学生是负担，所以标红。</li>
+    <li><strong>都是第 90 天量的，都是 30 个假学生的平均。</strong></li>
+    <li><strong>一格里两个数用斜线隔开时</strong>，前一个是独立裁判给的，后一个是同源裁判给的。</li>
+  </ul>
+  <p class="note">每个数具体怎么算，放在文末的<a href="#s8">指标与名词</a>。</p>
 </section>
 
 <!-- ========== 3 ========== -->
 <section class="part" id="s3">
-  <h2>前三轮：找原因<small>每一轮都在追问上一轮的结论</small></h2>
+  <h2>前三轮：找原因<small>领先是真的吗，从哪来的</small></h2>
 
-  <h3>第一轮：实验组确实领先，但领先和反应时无关</h3>
-  <p>实验组是完整设想（带反应时的模型 + 睡前再练 + 风险插队），对照组是纯 FSRS。90 天后实验组记住的核心词更多，新词 7 天记住率也更高。</p>
-  <p>然后做了一个关键检查：<strong>把假学生反应时里的真实信号关掉</strong>，让反应时变成纯噪声，再跑一遍。如果领先来自反应时，领先应该消失。结果几乎没变。</p>
-
+  <h3>先看六轮的全貌</h3>
   <table>
-    <thead><tr><th>第 90 天记住的核心词（实验 − 对照）</th><th class="num">HLR 裁判</th><th class="num">ACT-R 裁判</th></tr></thead>
+    <thead><tr><th>轮次</th><th>问的问题</th><th>答案</th><th>关键数字</th></tr></thead>
     <tbody>
-      <tr><td>反应时有信号</td><td class="num pos">+104</td><td class="num pos">+35</td></tr>
-      <tr><td>反应时是噪声</td><td class="num pos">+146</td><td class="num pos">+28</td></tr>
-      <tr><td><strong>两者之差，也就是反应时本身的贡献</strong></td><td class="num zero">−42（不显著）</td><td class="num zero">+7（不显著）</td></tr>
+      <tr><td>第一轮</td><td>实验组比对照组记得多吗？是反应时的功劳吗？</td><td>多，但和反应时无关。</td><td>多记 35 个核心词。把反应时变成随机数，仍多记 28 个。</td></tr>
+      <tr><td>第二轮</td><td>领先来自四样里的哪一样？</td><td>几乎全来自换模型。而换模型让题变多了。</td><td>多记 53 个，同时每天多做 46 题。</td></tr>
+      <tr><td>第三轮</td><td>题量一样时，我们的模型还赢吗？</td><td>不赢，反而少记两到三成。</td><td class="neg">少记 107 到 152 个。</td></tr>
+      <tr><td>第四轮</td><td>反应时换个用法行不行？</td><td>不行。</td><td class="zero">差 10 个，平手。</td></tr>
+      <tr><td>第五轮</td><td>每次挑最划算的词复习行不行？</td><td>不行，更差。</td><td class="neg">少记 63 到 93 个。</td></tr>
+      <tr><td>第六轮</td><td>每天固定题数能留住学生吗？</td><td>有可能，要真人确认。</td><td>坚持度高 0.04 到 0.13。</td></tr>
     </tbody>
   </table>
-  <p>同时注意到实验组白复习占比高出 20 到 34 个百分点，暗示它只是复习得更多。</p>
+  <p class="note">这张表里的数，除最后一行外都是独立裁判给的。最后一行的两个数，分别来自独立裁判和同源裁判。</p>
 
-  <h3>第二轮：拆成五级，看领先到底来自哪一步</h3>
-  <p>从对照组出发，一次只加一样东西：先加风险插队，再换成 HLR 模型，再加反应时特征，最后加「绿但慢就睡前再练」规则。看每一步各带来多少。</p>
+  <h3>第一轮：实验组领先，但领先和反应时无关</h3>
+  <div class="ask"><b>这轮问什么</b>实验组比对照组记得多吗？如果多，是反应时的功劳吗？</div>
+  <div class="ask"><b>怎么比</b>分两步。第一步正常跑，算实验组减对照组。第二步把假学生按键的快慢改成纯随机，也就是快慢里不再带任何「记得牢不牢」的信息，再算一次。如果领先是反应时带来的，第二步里领先应该消失。</div>
+
+  <table>
+    <thead><tr><th>第 90 天记住的核心词，实验组减对照组</th><th class="num">独立裁判</th><th class="num">同源裁判</th></tr></thead>
+    <tbody>
+      <tr><td>按键快慢里带着信息</td><td class="num pos">+35</td><td class="num pos">+104</td></tr>
+      <tr><td>按键快慢是纯随机</td><td class="num pos">+28</td><td class="num pos">+146</td></tr>
+      <tr><td><strong>上两行相减，也就是反应时本身的功劳</strong></td><td class="num zero">+7<span class="tie">平手</span></td><td class="num zero">−42<span class="tie">平手</span></td></tr>
+    </tbody>
+  </table>
+  <div class="read"><b>怎么读这张表。</b>第一行：实验组确实多记了，独立裁判下多 35 个，约一成。第二行：反应时变成随机数，领先还在。第三行是反应时自己的功劳，两位裁判都判平手。</div>
+
+  <p><strong>结论</strong>：领先是真的，但不是反应时带来的。同时有一个可疑的迹象。实验组的白复习占比是 55%，对照组只有 21%。它可能只是复习得更勤。</p>
+
+  <h3>第二轮：一样一样加，看领先来自哪一步</h3>
+  <div class="ask"><b>这轮问什么</b>实验组一共加了四样东西。领先是哪一样带来的？</div>
+  <div class="ask"><b>怎么比</b>从对照组出发，一次只加一样。先加风险插队，再把 FSRS 换成我们的模型，再加反应时，最后加睡前再练。每加一样就重跑一遍，看这一步多记了几个词。</div>
 
   <figure>
     <svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,PingFang SC,system-ui,sans-serif" font-size="12">
@@ -252,8 +376,8 @@ footer{margin-top:60px;color:var(--ink-3);font-size:13px;border-top:1px solid va
       <!-- group labels -->
       <g text-anchor="middle" fill="currentColor">
         <text x="140" y="290">加风险插队</text>
-        <text x="300" y="290">换成 HLR 模型</text>
-        <text x="460" y="290">加反应时特征</text>
+        <text x="300" y="290">换成我们的模型</text>
+        <text x="460" y="290">加反应时</text>
         <text x="620" y="290">加睡前再练</text>
       </g>
       <!-- scale: 1 word = 0.8px ; ACT-R bars (c1) left, HLR bars (c2) right -->
@@ -278,39 +402,41 @@ footer{margin-top:60px;color:var(--ink-3);font-size:13px;border-top:1px solid va
       <text x="605" y="172" text-anchor="middle" fill="currentColor" fill-opacity=".7">−10</text>
       <text x="635" y="184" text-anchor="middle" fill="currentColor" fill-opacity=".7">−24</text>
       <!-- legend -->
-      <rect x="60" y="14" width="12" height="12" fill="var(--c1)"/><text x="78" y="25" fill="currentColor">ACT-R 裁判</text>
-      <rect x="170" y="14" width="12" height="12" fill="var(--c2)"/><text x="188" y="25" fill="currentColor">HLR 裁判</text>
+      <rect x="60" y="14" width="12" height="12" fill="var(--c1)"/><text x="78" y="25" fill="currentColor">独立裁判</text>
+      <rect x="150" y="14" width="12" height="12" fill="var(--c2)"/><text x="168" y="25" fill="currentColor">同源裁判</text>
       <text x="700" y="25" text-anchor="end" fill="currentColor" fill-opacity=".6">纵轴：第 90 天多记住的核心词</text>
     </svg>
-    <figcaption>每加一样东西，第 90 天多记住几个核心词。两位裁判一致：几乎全部来自「换成 HLR 模型」这一步，其他三步接近零或为负。</figcaption>
+    <figcaption>每加一样东西，第 90 天多记住几个核心词。柱子朝上是多记，朝下是少记。两位裁判一致：几乎全部来自「换成我们的模型」这一步。</figcaption>
   </figure>
 
   <table>
-    <thead><tr><th>这一步</th><th>多记的核心词</th><th>每天多做的题</th><th>其他影响</th></tr></thead>
+    <thead><tr><th>这一步</th><th>多记的核心词</th><th>每天多做的题</th><th>其他变化</th></tr></thead>
     <tbody>
-      <tr><td>加风险插队</td><td class="num zero">−8 / −6（不显著）</td><td class="num">0</td><td>打断率升到 9% 到 17%。预测会忘就插队，但没换来掌握。</td></tr>
-      <tr><td><strong>换成 HLR 模型</strong></td><td class="num pos">+53 / +130</td><td class="num neg">+46 / +41（约 +38%）</td><td>白复习占比 +30 / +20 个百分点。ACT-R 下预测误差翻倍。</td></tr>
-      <tr><td>加反应时特征</td><td class="num zero">+1 / +4（不显著）</td><td class="num">−1 / +1</td><td>没有可见影响。</td></tr>
-      <tr><td>加「绿但慢就睡前再练」</td><td class="num neg">−10 / −24</td><td class="num">−4 / −7</td><td><strong>坚持度显著下降</strong>（−0.09 / −0.14）。三分钟热度型学生受伤最重，单画像少记 57 到 126 个词。</td></tr>
+      <tr><td>加风险插队</td><td class="num zero">−8 / −6<span class="tie">平手</span></td><td class="num">0</td><td>插队的题占到 9% 到 17%。打断了学习，没换来多记。</td></tr>
+      <tr><td><strong>换成我们的模型</strong></td><td class="num pos">+53 / +130</td><td class="num neg">+46 / +41</td><td>题量约多四成。白复习占比涨了 30 / 20 个百分点。独立裁判下预测误差翻倍。</td></tr>
+      <tr><td>加反应时</td><td class="num zero">+1 / +4<span class="tie">平手</span></td><td class="num">−1 / +1</td><td>看不出影响。</td></tr>
+      <tr><td>加睡前再练</td><td class="num neg">−10 / −24</td><td class="num">−4 / −7</td><td><strong>坚持度掉了 0.09 / 0.14。</strong>三分钟热度型最受伤，这类学生少记 57 到 126 个词。</td></tr>
     </tbody>
   </table>
-  <p style="color:var(--ink-3);font-size:14px">每格两个数依次是 ACT-R 裁判 / HLR 裁判。「不显著」指 95% 置信区间包含 0。</p>
+  <div class="read"><b>怎么读这张表。</b>每格两个数，前一个是独立裁判给的，后一个是同源裁判给的。四行里只有第二行明显是绿的。但它右边紧跟着一个红的：每天多做 46 题。</div>
 
-  <p><strong>这一轮的疑问</strong>：换模型多记的词，是模型猜得更准，还是只因为它让学生多做了四成的题？第三轮专门回答这个。</p>
+  <p><strong>为什么换模型会让题变多</strong>：我们的模型估计学生忘得更快，于是把复习排得更密。</p>
+  <p><strong>结论</strong>：插队和反应时没用。睡前再练有害。多记的词全来自换模型，而换模型同时让学生每天多做约四成的题。于是有了新的疑问：是模型估得准，还是只因为题多？</p>
 
   <h3>第三轮：把题量拉齐再比</h3>
-  <p>做法：让 FSRS 的目标记忆率从 0.90 逐级调到 0.97，题量就会逐级变多；让 HLR 从 0.90 逐级调到 0.80，题量逐级变少。每个模型得到一条「每天题量 对 记住的词」效率曲线。两条线重合，说明只是题量的事；HLR 在上方，说明模型有价值。</p>
+  <div class="ask"><b>这轮问什么</b>两边每天做一样多的题，我们的模型还能多记吗？</div>
+  <div class="ask"><b>怎么比</b>用目标记忆率这个旋钮来调题量。把 FSRS 从 0.90 一档档调高到 0.97，题越来越多。把我们的模型从 0.90 一档档调低到 0.80，题越来越少。然后挑出每天题量几乎一样的两档，直接比。</div>
 
   <figure>
     <svg viewBox="0 0 760 320" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,PingFang SC,system-ui,sans-serif" font-size="12">
       <!-- Left panel: ACT-R truth. x: 110..175 -> 60..340 ; y: 300..560 -> 250..40 -->
       <g>
-        <text x="200" y="22" text-anchor="middle" fill="currentColor" font-weight="600">ACT-R 裁判（独立）</text>
+        <text x="200" y="22" text-anchor="middle" fill="currentColor" font-weight="600">独立裁判</text>
         <line x1="60" y1="250" x2="340" y2="250" stroke="currentColor" stroke-opacity=".35"/>
         <line x1="60" y1="40" x2="60" y2="250" stroke="currentColor" stroke-opacity=".35"/>
         <g fill="currentColor" fill-opacity=".65" text-anchor="middle">
           <text x="60" y="268">110</text><text x="200" y="268">142</text><text x="340" y="268">175</text>
-          <text x="200" y="290">每活跃日题数</text>
+          <text x="200" y="290">每天题量</text>
         </g>
         <g fill="currentColor" fill-opacity=".65" text-anchor="end">
           <text x="54" y="254">300</text><text x="54" y="44">560</text>
@@ -322,16 +448,16 @@ footer{margin-top:60px;color:var(--ink-3);font-size:13px;border-top:1px solid va
         <polyline fill="none" stroke="var(--c2)" stroke-width="2.5" points="221.9,210.2 246.9,202.2 305.0,189.0"/>
         <circle cx="221.9" cy="210.2" r="4" fill="var(--c2)"/><circle cx="246.9" cy="202.2" r="4" fill="var(--c2)"/><circle cx="305.0" cy="189.0" r="4" fill="var(--c2)"/>
         <text x="300" y="58" fill="var(--c3)" text-anchor="end" font-weight="600">FSRS</text>
-        <text x="312" y="206" fill="var(--c2)" font-weight="600">HLR</text>
+        <text x="312" y="206" fill="var(--c2)" font-weight="600">我们的模型</text>
       </g>
       <!-- Right panel: HLR truth. x: 110..170 -> 440..720 ; y: 820..1000 -> 250..40 -->
       <g>
-        <text x="580" y="22" text-anchor="middle" fill="currentColor" font-weight="600">HLR 裁判（与我们的模型同源）</text>
+        <text x="580" y="22" text-anchor="middle" fill="currentColor" font-weight="600">同源裁判</text>
         <line x1="440" y1="250" x2="720" y2="250" stroke="currentColor" stroke-opacity=".35"/>
         <line x1="440" y1="40" x2="440" y2="250" stroke="currentColor" stroke-opacity=".35"/>
         <g fill="currentColor" fill-opacity=".65" text-anchor="middle">
           <text x="440" y="268">110</text><text x="580" y="268">140</text><text x="720" y="268">170</text>
-          <text x="580" y="290">每活跃日题数</text>
+          <text x="580" y="290">每天题量</text>
         </g>
         <g fill="currentColor" fill-opacity=".65" text-anchor="end">
           <text x="434" y="254">820</text><text x="434" y="44">1000</text>
@@ -343,125 +469,151 @@ footer{margin-top:60px;color:var(--ink-3);font-size:13px;border-top:1px solid va
         <polyline fill="none" stroke="var(--c2)" stroke-width="2.5" points="568.3,165.4 630.4,76.5 674.3,67.9"/>
         <circle cx="568.3" cy="165.4" r="4" fill="var(--c2)"/><circle cx="630.4" cy="76.5" r="4" fill="var(--c2)"/><circle cx="674.3" cy="67.9" r="4" fill="var(--c2)"/>
         <text x="640" y="204" fill="var(--c3)" font-weight="600">FSRS</text>
-        <text x="685" y="72" fill="var(--c2)" font-weight="600">HLR</text>
+        <text x="685" y="72" fill="var(--c2)" font-weight="600">我们的模型</text>
       </g>
-      <text x="380" y="312" text-anchor="middle" fill="currentColor" fill-opacity=".6">纵轴：第 90 天记住的核心词（六种学生平均）。两张图纵轴刻度不同，只看线的相对位置。</text>
+      <text x="380" y="312" text-anchor="middle" fill="currentColor" fill-opacity=".6">纵轴：第 90 天记住的核心词，六种学生平均。两张图纵轴刻度不同，只看线的相对位置。</text>
     </svg>
-    <figcaption>效率曲线。左图：独立裁判下，FSRS 的线整段在 HLR 上方，而且更陡。右图：同源裁判下 HLR 在上方，但它领先的那两个点同时对应更少的流失。</figcaption>
+    <figcaption>每个点是一档目标记忆率。越靠右，每天的题越多。越靠上，记住的词越多。横坐标相同的地方，谁的线在上面谁更好。左图里 FSRS 的线整段在上，而且更陡。右图相反。两图相反时，以左图为准。</figcaption>
   </figure>
 
   <table>
-    <thead><tr><th>题量基本相同的一对</th><th class="num">ACT-R 裁判：HLR − FSRS</th><th class="num">HLR 裁判：HLR − FSRS</th></tr></thead>
+    <thead><tr><th>独立裁判：题量几乎一样的一对</th><th class="num">每天题量</th><th class="num">我们的模型记住</th><th class="num">FSRS 记住</th><th class="num">我们的模型减 FSRS</th></tr></thead>
     <tbody>
-      <tr><td>HLR@0.80 对 FSRS@0.95（每天约 147 题 / 138 题）</td><td class="num neg">−107</td><td class="num pos">+27</td></tr>
-      <tr><td>HLR@0.90 对 FSRS@0.97 或 HLR@0.85 对 FSRS@0.97</td><td class="num neg">−152</td><td class="num pos">+98</td></tr>
-      <tr><td><strong>每多做 100 题多记几个核心词</strong></td><td class="num">FSRS 7.6，HLR 1.6</td><td class="num">FSRS 3.0，HLR 3.7</td></tr>
+      <tr><td>我们的模型调到 0.80，FSRS 调到 0.95</td><td class="num">148 对 147</td><td class="num">349</td><td class="num">457</td><td class="num neg">−107</td></tr>
+      <tr><td>我们的模型调到 0.90，FSRS 调到 0.97</td><td class="num">167 对 164</td><td class="num">376</td><td class="num">527</td><td class="num neg">−152</td></tr>
     </tbody>
   </table>
+  <table>
+    <thead><tr><th>同源裁判：题量几乎一样的一对</th><th class="num">每天题量</th><th class="num">我们的模型记住</th><th class="num">FSRS 记住</th><th class="num">我们的模型减 FSRS</th></tr></thead>
+    <tbody>
+      <tr><td>我们的模型调到 0.80，FSRS 调到 0.95</td><td class="num">138 对 138</td><td class="num">893</td><td class="num">865</td><td class="num pos">+27</td></tr>
+      <tr><td>我们的模型调到 0.85，FSRS 调到 0.97</td><td class="num">151 对 149</td><td class="num">969</td><td class="num">871</td><td class="num pos">+98</td></tr>
+    </tbody>
+  </table>
+  <table>
+    <thead><tr><th>每多做 100 题，多记几个核心词</th><th class="num">FSRS</th><th class="num">我们的模型</th></tr></thead>
+    <tbody>
+      <tr><td>独立裁判</td><td class="num">7.6</td><td class="num">1.6</td></tr>
+      <tr><td>同源裁判</td><td class="num">3.0</td><td class="num">3.7</td></tr>
+    </tbody>
+  </table>
+  <div class="read"><b>怎么读这三张表。</b>前两张看最后一列。独立裁判下是红的，我们的模型少记 107 到 152 个，约两到三成。同源裁判下是绿的。第三张说的是多做题值不值：独立裁判下，同样多做 100 题，FSRS 多记的词是我们的四倍多。个别数相减会差 1，是四舍五入造成的。</div>
 
   <div class="grid">
     <div class="callout bad" style="margin:0">
-      <strong>独立裁判说：同题量下 FSRS 明显更好。</strong>三种算法、六种学生方向一致。HLR 多出来的题大多花在已经很牢的词上，白复习占比 41% 到 55%。它的预测误差是 FSRS 的 2 到 5 倍。
+      <strong>独立裁判说：题量一样时，FSRS 明显更好。</strong>六种学生方向一致。我们的模型多排的题，大多花在已经很牢的词上，白复习占 41% 到 55%。它的预测误差是 FSRS 的 2 到 5 倍。
     </div>
     <div class="callout warn" style="margin:0">
-      <strong>同源裁判说：HLR 仍领先，但原因是留人。</strong>它领先的两对，坚持度同时高出 0.06 和 0.13，新词 7 天记住率高 11 到 17 个百分点。也就是说多记的词来自基础弱、家长盯着这类学生流失更少，不是同样的题记得更牢。而且这位裁判和我们的模型是一家人。
+      <strong>同源裁判说：我们的模型仍领先，但靠的是留人。</strong>它领先的两对里，坚持度同时高出 0.06 和 0.13。也就是说，多记的词来自基础弱型、家长盯着型这类学生放弃得更少，不是同样的题记得更牢。而且这位裁判天然偏向我们。
     </div>
   </div>
 
-  <p><strong>附带发现</strong>：对照组用的 FSRS 0.90 目标记忆率并不是调好的基线。独立裁判下只把它提到 0.93，就多记 62 个核心词，已经超过整个实验组对对照组的全部领先（35 个）。</p>
+  <p><strong>结论</strong>：两位裁判意见相反，按规矩听独立裁判的。题量一样时，我们的模型少记两到三成。第一轮看到的领先，是多做题换来的。</p>
+  <p><strong>附带发现</strong>：对照组的 FSRS 用的是默认的 0.90，其实没调好。独立裁判下只把它调到 0.93，每天多做 14 题，就多记 62 个核心词。而实验组加了四样东西，才多记 35 个。</p>
 </section>
 
 <!-- ========== 3b ========== -->
 <section class="part" id="s3b">
-  <h2>后三轮：试优化<small>骨架换回 FSRS，每轮只改一样东西</small></h2>
+  <h2>后三轮：试改法<small>排复习换回 FSRS，每轮只改一样</small></h2>
 
-  <p>前三轮之后列了五条优化路线。前两条是直接采纳的：骨架换回 FSRS，去掉「绿但慢就睡前再练」。后三条各用一轮实验来测。比法和第三轮一样：把题量拉齐，同一个学生比两次。</p>
+  <p>前三轮之后，先做了两个决定：排复习换回 FSRS，去掉睡前再练。然后想了三种新改法，各用一轮来测。比法不变：同一个假学生比两次，题量拉齐。</p>
+  <p class="note">这三轮拉齐题量的办法略有不同。不再挑题量相近的两档，而是算出「对手做同样多的题时会记住多少」，再相减。算法见文末的<a href="#s8">指标与名词</a>。</p>
 
-  <h3>第四轮：换个用法，让反应时进评分</h3>
-  <p><strong>想法</strong>：前面是把反应时喂给我们自己的模型，没用。FSRS 有四档评分，评分对下次间隔影响很大。那就让反应时去改评分：绿灯里比自己平时慢的算「勉强」，比平时快的算「轻松」，其余算「正常」。实际约 16% 的绿灯被判勉强，16% 被判轻松。</p>
+  <h3>第四轮：反应时换个用法，去改评分</h3>
+  <div class="ask"><b>这轮问什么</b>反应时喂给我们的模型没用。换个用法，直接喂给 FSRS 行不行？</div>
+  <div class="ask"><b>先补一点背景</b>FSRS 每次作答收一个四选一的评分：忘了、勉强、正常、轻松。评分越高，下次复习隔得越久。词猎只有三个键，红是忘了，黄是勉强，绿是正常。轻松这一档一直空着。</div>
+  <div class="ask"><b>怎么比</b>让反应时把绿键分得更细。按了绿但比自己平时慢，记成勉强。比平时快，记成轻松。其余还是正常。实际上每六次绿里，大约有一次被改成勉强，一次被改成轻松。然后和不改评分的 FSRS 比。</div>
 
   <table>
-    <thead><tr><th>第 90 天记住的核心词</th><th class="num">ACT-R 裁判</th><th class="num">HLR 裁判</th></tr></thead>
+    <thead><tr><th>第 90 天记住的核心词</th><th class="num">独立裁判</th><th class="num">同源裁判</th></tr></thead>
     <tbody>
-      <tr><td>四档评分 − 纯 FSRS，同题量</td><td class="num zero">−10（不显著）</td><td class="num zero">+3（不显著）</td></tr>
-      <tr><td>反应时信号本身的贡献，也就是信号开着减去信号关掉</td><td class="num zero">−3（不显著）</td><td class="num zero">+23（不显著）</td></tr>
-      <tr><td>每多做 100 题多记几个核心词</td><td class="num">纯 FSRS 6.8，四档 6.7</td><td class="num">纯 FSRS 2.4，四档 1.6</td></tr>
+      <tr><td>改评分减不改评分，题量拉齐</td><td class="num zero">−10<span class="tie">平手</span></td><td class="num zero">+3<span class="tie">平手</span></td></tr>
+      <tr><td>反应时本身的功劳，算法同第一轮</td><td class="num zero">−3<span class="tie">平手</span></td><td class="num zero">+23<span class="tie">平手</span></td></tr>
     </tbody>
   </table>
+  <div class="read"><b>怎么读这张表。</b>四个格子全是灰色的平手。改不改评分，结果一个样。多做题的回报也几乎相同：独立裁判下每多做 100 题，不改评分多记 6.8 个，改了多记 6.7 个。</div>
 
   <div class="callout bad">
-    <strong>结论：被否。</strong>同题量下打平，两位裁判一致。只做「快就算轻松」这一半更糟，间隔被拉长，题量和记住的词一起掉。唯一和信号有关的效应出现在新词 7 天记住率上，很小。
+    <strong>结论：被否。</strong>两位裁判一致。还试过只做一半，也就是只把快的记成轻松。结果更糟：复习间隔被拉长，题量和记住的词一起掉。
   </div>
 
-  <h3>第五轮：不按到期，按「这几分钟最划算」挑题</h3>
-  <p><strong>想法</strong>：学生每天时间有限。与其到期就复习，不如每次挑「多记住的把握 ÷ 要花的时间」最高的那个词，花够今天的时间预算就停。反应时在这里只用来估每题要花多久。预算试了 10、13、16 分钟三档。</p>
+  <h3>第五轮：不按日子排，每次挑最划算的词</h3>
+  <div class="ask"><b>这轮问什么</b>学生每天时间有限。不按日子排，改成每次挑最划算的词来复习，会不会更好？</div>
+  <div class="ask"><b>怎么比</b>给每天定一个时间预算，试了 10、13、16 分钟三档。每次从所有词里挑最划算的那个，也就是「复习它能多记住多少」除以「要花多少秒」最高的。时间花够，今天就结束。反应时在这里只用来估每题要花多久。对手是 FSRS 的老办法：哪个词到日子了，就复习哪个。</div>
 
   <table>
-    <thead><tr><th>第 90 天记住的核心词（按预算挑 − 到期就复习）</th><th class="num">ACT-R 裁判</th><th class="num">HLR 裁判</th></tr></thead>
+    <thead><tr><th>第 90 天记住的核心词，挑最划算的减到日子就复习</th><th class="num">独立裁判</th><th class="num">同源裁判</th></tr></thead>
     <tbody>
-      <tr><td>10 分钟档，同题量</td><td class="num neg">−63</td><td class="num zero">−4（不显著）</td></tr>
-      <tr><td>13 分钟档，同题量</td><td class="num neg">−93</td><td class="num zero">−1（不显著）</td></tr>
-      <tr><td>13 分钟档，同学习分钟</td><td class="num neg">−98</td><td class="num zero">+2</td></tr>
-      <tr><td><strong>每多做 100 题多记几个核心词</strong></td><td class="num">到期 7.3，预算 2.6</td><td class="num">到期 2.1，预算 2.2</td></tr>
+      <tr><td>10 分钟档，题量拉齐</td><td class="num neg">−63</td><td class="num zero">−4<span class="tie">平手</span></td></tr>
+      <tr><td>13 分钟档，题量拉齐</td><td class="num neg">−93</td><td class="num zero">−1<span class="tie">平手</span></td></tr>
+      <tr><td>13 分钟档，学习时间拉齐</td><td class="num neg">−98</td><td class="num zero">+2</td></tr>
     </tbody>
   </table>
+  <div class="read"><b>怎么读这张表。</b>独立裁判一列全是红的，少记 63 到 98 个。同源裁判一列接近零。16 分钟档能拉齐题量的假学生只有 5 个，方向相同，差得更多，表里没有列。多做题的回报也差得远：独立裁判下每多做 100 题，到日子就复习多记 7.3 个，挑最划算的只多记 2.6 个。</div>
+
+  <p><strong>为什么会更差</strong>：「划算」算得太短视。刚学过、还不稳的词，现在复习一次收益最大。于是时间都花在隔不到一天的反复重刷上。可记忆有一条很稳的规律：同样复习五次，隔开几天复习，比挤在一天里记得久。挤着复习当下好看，过后忘得快。</p>
 
   <div class="grid">
     <div class="callout bad" style="margin:0">
-      <strong>结论：被否。</strong>独立裁判下同题量、同分钟都明显更差。原因是「划算」的算法太短视：刚学过、还不稳的词现在复习收益最大，于是时间都花在隔不到一天的重刷上。间隔太短记不长久。
+      <strong>结论：被否。</strong>独立裁判下，题量拉齐、时间拉齐都明显更差。
     </div>
     <div class="callout warn" style="margin:0">
-      <strong>一个意外发现。</strong>「时间花完今天就停」没有让学生流失更多，反而略少。同源裁判下平均流失日从第 74 天推到第 84 天，基础弱型和考前突击型最明显。第六轮专门追这个。
+      <strong>一个意外发现。</strong>「时间花完今天就停」的假学生，放弃得反而更少。同源裁判下，平均放弃的日子从第 74 天推到第 84 天。基础弱型和考前突击型最明显。第六轮专门追这件事。
     </div>
   </div>
 
-  <h3>第六轮：每天固定任务量</h3>
-  <p><strong>想法</strong>：这一轮测的是产品形态，不是记忆模型。要让学生少做点题有两种办法。一是调低目标记忆率，复习间隔拉长。二是每天封顶，到数就说「今天完成」。同样减到一个题量，哪种留住的人多、少记的词少？另加一个变体：到期的题不够时，用快到期的词补足，让每天正好一样多。</p>
+  <h3>第六轮：每天固定题数</h3>
+  <div class="ask"><b>这轮问什么</b>每天的题数固定，做完就显示「今天完成」，能不能留住学生？这一轮测的是产品玩法，不是记忆算法。</div>
+  <div class="ask"><b>怎么比，第一场</b>想让学生少做题，有两种办法。一种是把目标记忆率调低，复习变稀。另一种叫<strong>封顶</strong>，也就是每天最多出固定的题数，到数就结束。减到同样的题量，比哪种更好。</div>
+  <div class="ask"><b>怎么比，第二场</b>封顶有个毛病：有些天到日子的题不够数。于是加一个变体叫<strong>补足</strong>，也就是拿快到日子的词来凑，让每天正好一样多。比补足和只封顶。</div>
 
   <table>
-    <thead><tr><th>同题量下：封顶 − 调低记忆率</th><th class="num">ACT-R 裁判</th><th class="num">HLR 裁判</th></tr></thead>
+    <thead><tr><th>第一场：封顶减调低记忆率，题量拉齐</th><th class="num">独立裁判</th><th class="num">同源裁判</th></tr></thead>
     <tbody>
-      <tr><td>坚持度</td><td class="num zero">+0.04（不显著）</td><td class="num zero">+0.02（不显著）</td></tr>
-      <tr><td>流失推迟几天</td><td class="num zero">1.5（不显著）</td><td class="num pos">3.4</td></tr>
+      <tr><td>坚持度</td><td class="num zero">+0.04<span class="tie">平手</span></td><td class="num zero">+0.02<span class="tie">平手</span></td></tr>
+      <tr><td>放弃推迟几天</td><td class="num zero">1.5<span class="tie">平手</span></td><td class="num pos">3.4</td></tr>
       <tr><td>第 90 天记住的核心词</td><td class="num pos">+21</td><td class="num pos">+19</td></tr>
     </tbody>
   </table>
 
   <table>
-    <thead><tr><th>补足到固定题数 − 只封顶</th><th class="num">ACT-R 裁判</th><th class="num">HLR 裁判</th></tr></thead>
+    <thead><tr><th>第二场：补足减只封顶</th><th class="num">独立裁判</th><th class="num">同源裁判</th></tr></thead>
     <tbody>
       <tr><td>坚持度</td><td class="num pos">+0.04</td><td class="num pos">+0.13</td></tr>
-      <tr><td>新词 7 天记住率</td><td class="num pos">+0.04</td><td class="num pos">+0.18</td></tr>
-      <tr><td>流失推迟几天</td><td class="num zero">2（不显著）</td><td class="num pos">8</td></tr>
-      <tr><td>第 90 天记住的核心词</td><td class="num zero">−2（不显著）</td><td class="num pos">+98</td></tr>
-      <tr><td>代价</td><td colspan="2">每天多 31 题、多 2.5 分钟，白复习占比 45%</td></tr>
+      <tr><td>新词 7 天记住率</td><td class="num pos">高 4 个百分点</td><td class="num pos">高 18 个百分点</td></tr>
+      <tr><td>放弃推迟几天</td><td class="num zero">2<span class="tie">平手</span></td><td class="num pos">8</td></tr>
+      <tr><td>第 90 天记住的核心词</td><td class="num zero">−2<span class="tie">平手</span></td><td class="num pos">+98</td></tr>
+      <tr><td>代价</td><td colspan="2">每天多 31 题、多 2.5 分钟。白复习占比 45%，对照组约 21%。</td></tr>
     </tbody>
   </table>
+  <div class="read"><b>怎么读这两张表。</b>第一场：坚持度是平手，封顶没有明显留住人，但多记了约 20 个词。第二场：坚持度两位裁判都是绿的，补足留住了人。最后一行是它的代价。</div>
 
   <div class="grid">
     <div class="callout warn" style="margin:0">
-      <strong>只封顶：不留人，但比调低记忆率划算。</strong>假学生每天只学十几分钟，本来就不累，少做题减不了多少疲劳。好处在别处：同样题量下封顶多记约 20 个核心词。代价是新词被挤掉，最紧一档 90 天少学两成新词，欠下的复习也更多。
+      <strong>只封顶：留不住人，但比调低记忆率划算。</strong>假学生每天只学十几分钟，本来就不累，少做几题也轻松不了多少。好处在别处：同样的题量，多记约 20 个核心词。代价是新词被挤掉。最紧的一档，90 天少学两成新词，欠下的复习也更多。
     </div>
     <div class="callout warn" style="margin:0">
-      <strong>补足：留人，但原因可疑。</strong>补进来的是还没到期的词，几乎全对。假学生的设定是「答对多就觉得有进步」，于是信心和动力上涨。真人也可能觉得太简单没意思。上一轮「花完就停」流失更少，很可能是同一个原因。
+      <strong>补足：能留人，但原因可疑。</strong>补进来的是还没到日子的词，几乎全对。假学生有一条设定：答对多就更有信心、更有劲。于是他们留下来了。真人却可能觉得太简单、没意思。上一轮「花完就停」放弃更少，很可能是同一个原因。
     </div>
   </div>
 
   <ul>
-    <li><strong>对谁有效</strong>：补足的效果集中在基础弱型和三分钟热度型。稳扎稳打型和尖子型为零。考前突击型在最紧的封顶下反而变差。</li>
-    <li><strong>没测到的部分</strong>：「今天任务做完了」的完成感，假学生身上没有这个设定。所以这一轮测到的只是下界。</li>
-    <li><strong>一个产品细节</strong>：封顶后错题重练和睡前对战照常，实际题量会比上限多 15 到 20 题。「今天 N 题」算不算这些，界面上要说清楚。</li>
+    <li><strong>对谁有效</strong>：补足的效果集中在基础弱型和三分钟热度型。稳扎稳打型和尖子型没有变化。考前突击型在最紧的封顶下反而变差。</li>
+    <li><strong>没测到的部分</strong>：「今天的任务做完了」的满足感，假学生没有这项设定。所以这部分好处在模拟里是零。真人身上如果有，效果只会比这里更好。</li>
+    <li><strong>一个产品细节</strong>：封顶之后，错题重练和睡前的集中复习照常，实际题量会比上限多 15 到 20 题。「今天 N 题」算不算这些，界面上要说清楚。</li>
   </ul>
 
-  <h3>五条优化路线的结果</h3>
+  <p><strong>结论</strong>：交给真人。封顶值得试，因为不亏。补足是不是真能留人，假学生说了不算。</p>
+
+  <h3>两个决定和三种改法，各自的结局</h3>
   <table>
-    <thead><tr><th>路线</th><th>结果</th><th>现状</th></tr></thead>
+    <thead><tr><th>做法</th><th>结果</th><th>结局</th></tr></thead>
     <tbody>
-      <tr><td>骨架换回 FSRS，目标记忆率提到 0.93</td><td>独立裁判下同题量明显更好，提记忆率是最划算的旋钮。</td><td><span class="tag hi">采纳</span></td></tr>
-      <tr><td>去掉「绿但慢就睡前再练」，风险插队默认关</td><td>前者伤坚持度，后者没有增益。</td><td><span class="tag hi">采纳</span></td></tr>
-      <tr><td>反应时改进 FSRS 的评分</td><td>同题量打平，信号贡献不显著。</td><td><span class="tag lo">被否</span></td></tr>
-      <tr><td>按时间预算挑最划算的词</td><td>独立裁判下少记 60 到 90 个核心词。</td><td><span class="tag lo">被否</span></td></tr>
-      <tr><td>每天固定任务量</td><td>封顶本身不留人。补足留人，但依赖假设。完成感没法模拟。</td><td><span class="tag mid">交给真人内测</span></td></tr>
+      <tr><td>排复习换回 FSRS，目标记忆率调到 0.93</td><td>独立裁判下，题量拉齐后明显更好。调高目标记忆率是最划算的旋钮。</td><td><span class="tag hi">采纳</span></td></tr>
+      <tr><td>去掉睡前再练，风险插队默认关</td><td>前者让学生更容易放弃，后者没有多记词。</td><td><span class="tag hi">采纳</span></td></tr>
+      <tr><td>反应时去改 FSRS 的评分</td><td>题量拉齐后是平手。</td><td><span class="tag lo">被否</span></td></tr>
+      <tr><td>每次挑最划算的词</td><td>独立裁判下少记 63 到 93 个核心词。</td><td><span class="tag lo">被否</span></td></tr>
+      <tr><td>每天固定题数</td><td>封顶留不住人。补足能留人，但靠一条没把握的设定。满足感模拟不了。</td><td><span class="tag mid">交给真人</span></td></tr>
     </tbody>
   </table>
 </section>
@@ -471,83 +623,107 @@ footer{margin-top:60px;color:var(--ink-3);font-size:13px;border-top:1px solid va
   <h2>对产品意味着什么<small>逐条对照最初的设想</small></h2>
 
   <table>
-    <thead><tr><th>设想里的卖点</th><th>模拟结果</th><th>现状</th></tr></thead>
+    <thead><tr><th>设想里的卖点</th><th>测下来</th><th>结论</th></tr></thead>
     <tbody>
-      <tr><td><strong>反应时能看出「会了但不牢」</strong>，提前安排复习</td><td>试了两种用法：喂给我们自己的模型，喂给 FSRS 的评分。信号开和关结果都一样。</td><td><span class="tag lo">无证据</span></td></tr>
-      <tr><td><strong>更懂遗忘的模型</strong>（HLR 家族）</td><td>多记的词是多做题换来的。题量拉齐后独立裁判下反而更差，预测误差更大。</td><td><span class="tag lo">不成立</span></td></tr>
-      <tr><td><strong>预测要忘就插队</strong></td><td>掌握没有增益，打断率 9% 到 17%。</td><td><span class="tag lo">无增益</span></td></tr>
-      <tr><td><strong>绿但慢，睡前再练一遍</strong></td><td>坚持度显著下降，三分钟热度型学生伤最重。</td><td><span class="tag lo">有害</span></td></tr>
-      <tr><td><strong>三键 + 离线 + 专注设备</strong>的形态</td><td>模拟环境不评价形态。Demo 已做出来，可直接内测。</td><td><span class="tag mid">待真人验证</span></td></tr>
-      <tr><td><strong>固定时间里挑最划算的词</strong></td><td>独立裁判下不如到期就复习，时间被花在太短的间隔上。</td><td><span class="tag lo">不成立</span></td></tr>
-      <tr><td><strong>每天固定任务量</strong>，做完就结束</td><td>封顶不留人，补足留人但依赖假设。完成感模拟不了。</td><td><span class="tag mid">待真人验证</span></td></tr>
-      <tr><td>多做题多记词</td><td>两位裁判一致，而且 FSRS 的边际效率更高。</td><td><span class="tag hi">成立，但不独特</span></td></tr>
+      <tr><td><strong>用反应时看出「会了但不牢」</strong></td><td>试了两种用法：喂给我们的模型，喂给 FSRS 的评分。有它没它，结果一样。</td><td><span class="tag lo">没看到作用</span></td></tr>
+      <tr><td><strong>自己的记忆模型</strong></td><td>多记的词是多做题换来的。题量拉齐后，独立裁判下反而更差，估得也更不准。</td><td><span class="tag lo">不成立</span></td></tr>
+      <tr><td><strong>快忘了就插队复习</strong></td><td>没有多记词。插队的题占到 9% 到 17%。</td><td><span class="tag lo">没用</span></td></tr>
+      <tr><td><strong>绿但慢，睡前再练一遍</strong></td><td>坚持度明显下降，三分钟热度型最受伤。</td><td><span class="tag lo">有害</span></td></tr>
+      <tr><td><strong>每次挑最划算的词</strong></td><td>不如到日子就复习。时间被花在挤在一起的重刷上。</td><td><span class="tag lo">不成立</span></td></tr>
+      <tr><td><strong>每天固定题数</strong>，做完就结束</td><td>封顶留不住人。补足能留人，但靠一条没把握的设定。</td><td><span class="tag mid">待真人验证</span></td></tr>
+      <tr><td><strong>三键、离线、专注设备</strong>的形态</td><td>假学生评价不了。软件版已经做出来，可以直接找人试。</td><td><span class="tag mid">待真人验证</span></td></tr>
+      <tr><td>多做题多记词</td><td>两位裁判一致。而且同样多做 100 题，FSRS 多记的词更多。</td><td><span class="tag hi">成立，但谁都能做到</span></td></tr>
     </tbody>
   </table>
 
   <div class="callout">
-    <strong>最诚实的说法是：</strong>到目前为止，「词猎」在算法上相对于一个调好参数的开源 FSRS，没有可证明的优势。后三轮换了三种改法，这个判断没有变。它的差异化只剩下硬件形态、专注体验、每天任务的仪式感和面向初高中的内容。这几样模拟环境测不了，只能真人测。
+    <strong>最诚实的说法是：</strong>到目前为止，词猎在算法上比不过一个调好的免费 FSRS。后三轮换了三种改法，这个判断没有变。它的特别之处只剩设备形态、专注体验、每天任务的仪式感、面向初高中的内容。这几样只能找真人来测。
   </div>
 
-  <h3>一个要特别说明的点</h3>
-  <p><strong>反应时的结论有一个前提</strong>：模拟里反应时和记忆牢固度的关系是我们自己设的（关联强度 0.6，属于偏乐观）。在这个偏乐观的设定下，两种用法都没有贡献。说明问题不在信号弱，而在「知道这个词不牢」之后，调度上能做的事本来就不多：早复习一点，或者晚复习一点。真人的反应时信号有多强，只有内测数据能回答。所以内测时反应时照收，但先不让它影响调度。</p>
+  <h3>关于反应时，要多说一句</h3>
+  <p><strong>反应时的结论有一个前提。</strong>假学生按键的快慢和「记得牢不牢」有多大关系，是我们自己设的，而且设得偏乐观。就算这样，两种用法都没起作用。</p>
+  <p>这说明问题不在信号弱。问题在于，就算知道一个词不牢，产品能做的事也不多：早一点复习，或者晚一点复习。</p>
+  <p>真人按键的快慢里有多少信息，只有真人数据能回答。所以找真人试用时，反应时照常记录，但先不让它影响排复习。</p>
 </section>
 
 <!-- ========== 5 ========== -->
 <section class="part" id="s5">
   <h2>局限<small>这些结论哪里可能错</small></h2>
   <ul>
-    <li><strong>假学生不是真学生。</strong>六种画像和心理六维的参数是按常识设的，没有用真实数据标定过。方向性结论（哪一步有用、哪一步有害）比具体数字可靠得多。</li>
-    <li><strong>两位裁判意见相反时我们信独立的那位。</strong>这是合理默认，但不是定论。如果真人数据表明记忆曲线更像 HLR 家族，第三轮的结论会翻过来。</li>
-    <li><strong>只跑了 90 天、6 画像 × 5 种子的快速矩阵。</strong>一年期只跑过单个画像。全量矩阵还没跑。</li>
-    <li><strong>插队阈值是固定的 0.3。</strong>HLR 预测忘得快，插队就多，这部分题量不随目标记忆率下降，导致两个模型题量范围几乎不重叠，同量比较有一部分靠外推。要做干净，得让阈值一起变。</li>
-    <li><strong>流失主导时按题量比较不可靠。</strong>基础弱型学生在 FSRS 下几乎全员流失，那一格曲线画不出来。</li>
-    <li><strong>假学生没有「完成感」。</strong>第六轮只测到「少做题就少累」这条路，而这条路几乎是空的。固定任务量真正的卖点，做完的满足感和开始的门槛变低，没有建模。</li>
-    <li><strong>补足的留人效果靠一条假设。</strong>假学生「答对多就有进步感」，对「太简单」的反感只设了很弱的一项。真人可能相反。</li>
-    <li><strong>封顶的长期代价看不到。</strong>欠下的复习会越积越多，90 天还没显出后果，要跑 180 天。</li>
-    <li><strong>后三轮有不少配对靠外推。</strong>两种做法的题量范围对不齐时只能外推。正文只引用了范围内的配对，样本数因此偏少，有的只有个位数。</li>
-    <li><strong>核心词覆盖率封顶在 0.69。</strong>起点以下的核心词目前不再学，是已知的产品缺口，需要加一个「基础词快查」。</li>
+    <li><strong>假学生不是真学生。</strong>六种类型和心情的设定是按常识定的，没有拿真实数据校准过。所以方向比数字可靠：哪样有用、哪样有害可以信，具体多几个词不要太当真。</li>
+    <li><strong>两位裁判意见相反时，我们听了独立裁判的。</strong>这是合理的默认做法，但不是定论。如果真人的遗忘规律更像同源裁判，第三轮的结论会反过来。</li>
+    <li><strong>只测了 90 天，30 个假学生。</strong>一年期只跑过一种类型。更大规模的还没跑。</li>
+    <li><strong>第三轮的题量没有完全拉齐。</strong>我们的模型插队多，题量降不下来，和 FSRS 的题量范围重叠很少。能直接比的只有表里那几对。</li>
+    <li><strong>放弃的学生太多时，拉齐题量的比法不可靠。</strong>比如基础弱型在 FSRS 下几乎全部放弃，这一类画不出线。</li>
+    <li><strong>假学生没有「做完了」的满足感。</strong>第六轮只测到「少做题就少累」这一条好处，而假学生本来就不累。固定题数真正的卖点没测到。</li>
+    <li><strong>补足能留人，靠的是一条设定。</strong>假学生答对多就更有劲，对「太简单」只有很轻的反感。真人可能相反。</li>
+    <li><strong>封顶的长期代价看不到。</strong>欠下的复习会越积越多，90 天还没显出后果，要跑到 180 天才知道。</li>
+    <li><strong>后三轮有些比较样本偏少。</strong>两种做法的题量对不齐时，我们只用对得齐的那部分假学生，有的只剩几个人。</li>
+    <li><strong>核心词最多只能学到约七成。</strong>比起点更常用的词，产品默认学生已经会，不再教。这是已知的缺口，要补一个「基础词快查」。</li>
   </ul>
 </section>
 
 <!-- ========== 6 ========== -->
 <section class="part" id="s6">
-  <h2>下一步怎么选<small>模拟能答的已经答完，剩下的交给真人</small></h2>
+  <h2>下一步怎么选<small>假学生能答的已经答完，剩下的交给真人</small></h2>
 
   <div class="grid">
     <div class="card">
-      <h3 style="margin-top:0">A. 算法定型</h3>
-      <p>用 FSRS，按到期复习，目标记忆率默认 0.93，并把它当成唯一的「学习强度」旋钮给家长或老师。去掉「绿但慢就睡前再练」，风险插队默认关。反应时照收，不参与调度。</p>
+      <h3 style="margin-top:0">A. 把算法定下来</h3>
+      <p>用 FSRS，到日子就复习。目标记忆率默认 0.93，并把它做成家长或老师能调的「学习强度」。去掉睡前再练，风险插队默认关。反应时照常记录，不影响排复习。</p>
       <p><span class="tag hi">成本低</span><span class="tag hi">立刻能做</span></p>
     </div>
     <div class="card">
-      <h3 style="margin-top:0">B. 真人内测，分三组</h3>
-      <p>第一组现状，不封顶。第二组每天固定题数，不够就补足，做完显示「今日任务完成」。第三组只封顶不补足。上限按每人前两周日题量的中位数定。</p>
+      <h3 style="margin-top:0">B. 找真人试用，分三组</h3>
+      <p>第一组维持现状，不封顶。第二组每天固定题数，不够就补足，做完显示「今日任务完成」。第三组只封顶不补足。每人的上限，按他前两周每天题量的中间水平来定。</p>
       <p><span class="tag mid">成本中</span><span class="tag hi">唯一能回答核心问题的路</span></p>
     </div>
     <div class="card">
-      <h3 style="margin-top:0">C. 模拟侧补三件</h3>
-      <p>跑 180 天看封顶的长期代价。加一个「封顶但新词优先」的变体。给假学生临时加完成感，看结论对这个假设有多敏感。</p>
+      <h3 style="margin-top:0">C. 模拟再补三件</h3>
+      <p>跑 180 天，看封顶的长期代价。试一个「封顶但新词优先」的变体。给假学生临时加上满足感，看结论会不会变。</p>
       <p><span class="tag mid">成本中</span><span class="tag mid">只能更确定，不会翻盘</span></p>
     </div>
   </div>
 
-  <h3>内测看什么</h3>
+  <h3>真人试用看什么</h3>
   <table>
-    <thead><tr><th>类别</th><th>指标</th><th>用来回答</th></tr></thead>
+    <thead><tr><th>类别</th><th>看什么</th><th>用来回答</th></tr></thead>
     <tbody>
-      <tr><td><strong>主指标</strong></td><td>学生 7 天和 30 天留存、每周活跃天数、任务完成率</td><td>固定任务量是否留人，补足本身有没有用</td></tr>
-      <tr><td><strong>学习结果</strong></td><td>隔一段时间抽测，不看题量</td><td>留下来的学生是不是真的记住了</td></tr>
-      <tr><td><strong>护栏</strong></td><td>每天新词数、欠下的复习数、白复习占比</td><td>封顶有没有把新词挤掉，补足是不是在刷简单题</td></tr>
-      <tr><td><strong>顺带收集</strong></td><td>每题反应时和对错</td><td>真人反应时和遗忘有多相关，真人的遗忘曲线更像哪位裁判</td></tr>
+      <tr><td><strong>最主要的</strong></td><td>学生第 7 天、第 30 天还在不在用。每周来几天。每天的任务做完没有。</td><td>固定题数能不能留人，补足有没有用。</td></tr>
+      <tr><td><strong>学习结果</strong></td><td>隔一段时间抽测，不看做了多少题。</td><td>留下来的学生是不是真记住了。</td></tr>
+      <tr><td><strong>防出事的</strong></td><td>每天学几个新词，欠了多少复习，白复习占多少。</td><td>封顶有没有把新词挤掉，补足是不是在刷简单题。</td></tr>
+      <tr><td><strong>顺带收集</strong></td><td>每题的反应时和对错。</td><td>真人按键快慢和遗忘有多大关系。真人的遗忘更像哪位裁判。</td></tr>
     </tbody>
   </table>
-  <p>按入组前的日题量和正确率分层。模拟预计效果集中在基础弱和三分钟热度的学生，这两类要保证人数。</p>
+  <p>模拟预计效果集中在基础弱和三分钟热度这两类学生。分组时要保证这两类人数够。</p>
 
   <div class="callout">
-    <strong>建议：A 立刻做，B 尽快开始，C 可做可不做。</strong>六轮下来，模拟环境已经把它能回答的都回答了。剩下的两个问题，完成感留不留人、反应时信号有多强，只有真人数据能答。真人数据回来后再用它重新标定假学生。
+    <strong>建议：A 立刻做，B 尽快开始，C 可做可不做。</strong>六轮下来，假学生能回答的都回答了。剩下两个问题只有真人数据能答：满足感能不能留人，反应时里有多少信息。真人数据回来后，再拿它校准假学生。
   </div>
 
-  <p>另外两件和方向无关、该做就做的事：加基础词快查补上覆盖率缺口；调度器缓存词表，把一年模拟从 40 多秒压下来。</p>
+  <p>另外两件和方向无关、该做就做的事。一是加基础词快查，补上核心词只能学到七成的缺口。二是给模拟提速，现在跑一年期要 40 多秒。</p>
+</section>
+
+<!-- ========== 1 ========== -->
+<section class="part" id="s1">
+  <h2>Demo 做了什么<small>软件版和测试台，两天做完</small></h2>
+
+  <table>
+    <thead><tr><th>部分</th><th>干什么</th><th class="num">自动测试</th></tr></thead>
+    <tbody>
+      <tr><td><strong>词库</strong></td><td>从开源词典和例句库里挑出初高中约 3600 个词，标好难度、常用程度和容易混淆的词。</td><td class="num">31</td></tr>
+      <tr><td><strong>算法库</strong></td><td>四种记忆算法的实现，加上拿数据调参数、比准确度的工具。</td><td class="num">38</td></tr>
+      <tr><td><strong>手机端</strong></td><td>能装到手机上、断网也能用的网页应用。三键作答，记反应时，在本机排复习，联网后把学习记录传回去。</td><td class="num">113</td></tr>
+      <tr><td><strong>服务端</strong></td><td>收学习记录，下发词库和参数，批量生成例句和发音，带一个看实验数据的后台。</td><td class="num">39</td></tr>
+      <tr><td><strong>测试台</strong></td><td>假学生、快进的时钟、算指标、出报告。就是前面<a href="#s2">怎么测的</a>那一套。</td><td class="num">90</td></tr>
+    </tbody>
+  </table>
+
+  <p>自动测试，也就是让程序自己检查自己有没有算错。五部分一共 311 个，全部通过。</p>
+
+  <div class="callout">
+    <strong>一个在测试中发现并修掉的产品问题。</strong>按常用程度从高到低教新词，第一批会是 the、be、and、of 这种学生早就会的词。现在改成按学段设起点。初中从第 600 个常用词附近开始，高中从第 1500 个附近开始，再按学生实际会多少上下调。
+  </div>
 </section>
 
 <!-- ========== 8 ========== -->
@@ -557,19 +733,20 @@ footer{margin-top:60px;color:var(--ink-3);font-size:13px;border-top:1px solid va
   <p>这一节是查阅用的。读前面遇到看不懂的数或词，回这里找。</p>
 
   <h3>先说三条读数的约定</h3>
+  <p>颜色怎么看、什么叫好，在前面<a href="#sj">怎么算好</a>一节。这里只说数是怎么来的。</p>
   <ul>
     <li><strong>都是第 90 天量的。</strong>没有另外说明时，每个数都是模拟跑到第 90 天那一刻的结果。</li>
     <li><strong>都是 30 个假学生的平均。</strong>六种学生，每种跑 5 遍，一共 30 个。</li>
     <li><strong>「A − B」是同一个学生比两次。</strong>同一个假学生先用做法 A 学 90 天，再回到起点用做法 B 学 90 天，两个结果相减。30 个学生各减各的，再取平均。正数表示 A 更多。</li>
   </ul>
-  <p>一格里有两个数、中间用斜线隔开时，前一个是 ACT-R 裁判给的，后一个是 HLR 裁判给的。</p>
+  <p>一格里有两个数、中间用斜线隔开时，前一个是独立裁判给的，后一个是同源裁判给的。</p>
 
   <h3>记了多少</h3>
   <table class="defs">
     <thead><tr><th>指标</th><th>怎么算</th></tr></thead>
     <tbody>
       <tr><td>记住的核心词</td><td>逐个核心词去问裁判：从今天起不再复习，30 天后还记得吗？记得就算一个，最后数个数。
-        <span class="how">两位裁判对「记得」划的线不一样。ACT-R 裁判要求 30 天后答对的把握不低于 90%。HLR 裁判要求这个词的半衰期不短于 30 天，也就是 30 天后把握不低于 50%。所以 HLR 裁判给的数总是大得多。两位裁判的数不能互相比，只能各自看两种做法差多少。</span></td></tr>
+        <span class="how">两位裁判对「记得」划的线不一样。独立裁判要求 30 天后答对的把握不低于 90%。同源裁判要求这个词的半衰期不短于 30 天，也就是 30 天后把握不低于 50%。所以 同源裁判给的数总是大得多。两位裁判的数不能互相比，只能各自看两种做法差多少。</span></td></tr>
       <tr><td>核心词覆盖率</td><td><span class="formula">记住的核心词 ÷ 核心词总数 1600</span>
         <span class="how">目前最高只到 0.69，因为起点以下的基础词产品不再教。</span></td></tr>
       <tr><td>新词 7 天记住率</td><td>每个新词学完满 7 天那天，去问一次裁判：现在答对的把握有没有 90%？
@@ -628,12 +805,12 @@ footer{margin-top:60px;color:var(--ink-3);font-size:13px;border-top:1px solid va
       <tr><td>题量基本相同的一对</td><td>第三轮用的另一种比法。不画线，直接挑两组平均每天题量相差不到 5 题的来比。</td></tr>
       <tr><td>反应时信号的贡献</td><td>分两步。第一步，正常跑，算实验组减对照组。第二步，把假学生反应时里的真实信号关掉，变成纯随机数，再算一次实验组减对照组。
         <span class="formula">第一步的差 − 第二步的差</span>
-        <span class="how">比如第一轮 ACT-R 裁判下是 35 − 28 = 7。如果领先真是反应时带来的，关掉信号后领先应该消失，这个数会接近 35。结果只有 7，说明领先和反应时无关。</span></td></tr>
+        <span class="how">比如第一轮 独立裁判下是 35 − 28 = 7。如果领先真是反应时带来的，关掉信号后领先应该消失，这个数会接近 35。结果只有 7，说明领先和反应时无关。</span></td></tr>
       <tr><td>关联强度 0.6</td><td>我们给假学生设的一个旋钮：词记得越不牢，按键越慢，这层关系有多强。0 是完全无关，1 是完全决定。
         <span class="how">0.6 属于偏乐观。「关掉信号」就是把它设成 0。</span></td></tr>
       <tr><td>95% 置信区间</td><td>30 个学生有 30 个差值。从里面有放回地随机抽 30 个算平均，重复 2000 次，得到 2000 个平均数。去掉最大和最小的各 2.5%，剩下的范围就是置信区间。
         <span class="how">它回答的是：换一批学生，这个差大概会落在哪。</span></td></tr>
-      <tr><td>显著、不显著</td><td>置信区间不包含 0 叫显著，包含 0 叫不显著。
+      <tr><td>平手、显著、不显著</td><td>置信区间不包含 0 叫显著，包含 0 叫不显著。正文里把不显著写成「平手」。
         <span class="how">比如多记 21 个核心词，区间是 4 到 43，不含 0，显著。坚持度高 0.04，区间是 −0.00 到 0.13，含 0，不显著，意思是这点差别可能只是运气。</span></td></tr>
       <tr><td>百分点</td><td>两个百分比直接相减。从 50% 到 61% 是高了 11 个百分点。</td></tr>
     </tbody>
@@ -649,12 +826,13 @@ footer{margin-top:60px;color:var(--ink-3);font-size:13px;border-top:1px solid va
     <dt>FSRS</dt><dd>一个开源的复习排程算法，背单词软件 Anki 已经内置了它。它给每个词估两个数：记得多稳、本身多难，再按目标记忆率算出下次哪天复习。FSRS-6 是它的第六版。</dd>
     <dt>四档评分</dt><dd>FSRS 每次作答收一个四选一的评分：忘了、勉强、正常、轻松。评分越高，下次隔得越久。我们的三键对应前三档：红是忘了，黄是勉强，绿是正常。</dd>
     <dt>HLR</dt><dd>半衰期回归，多邻国 2016 年公开的模型。用答对几次、答错几次这类数，直接估一个词的半衰期。</dd>
-    <dt>带反应时的 HLR</dt><dd>我们在 HLR 上加了几项和反应时有关的输入，比如这次按键比平时慢多少。文档里写作 RT-HLR。</dd>
+    <dt>带反应时的 HLR</dt><dd>我们在 HLR 上加了几项和反应时有关的输入，比如这次按键比平时慢多少。文档里写作 RT-HLR。正文里叫它「我们的模型」。</dd>
     <dt>SM-2</dt><dd>上世纪八十年代的老算法，早期 Anki 用它。只在算法库里做参照，没进实验。</dd>
     <dt>ACT-R</dt><dd>认知心理学里的一套记忆理论。每学一次留下一条痕迹，痕迹随时间变淡。复习隔得越开，新痕迹淡得越慢。所以它自带间隔效应。</dd>
     <dt>裁判</dt><dd>假学生脑子里的真实记忆，学名叫真值。产品看不到它，只能看到学生按了哪个键、用了多久。算指标时我们直接去问裁判。</dd>
-    <dt>同源、主场优势</dt><dd>HLR 裁判和我们的 HLR 模型用的是同一套公式。模型猜裁判等于开卷考试，成绩会虚高。ACT-R 裁判是另一套公式，所以叫独立裁判。</dd>
-    <dt>骨架</dt><dd>排复习日程用的那个基础模型。「骨架换回 FSRS」就是不再用 HLR 排日程，改用 FSRS。</dd>
+    <dt>独立裁判、同源裁判</dt><dd>独立裁判按 ACT-R 的公式忘词，和我们的模型、和 FSRS 都不是一套。同源裁判按 HLR 的公式忘词，和我们的模型是同一套。模型去猜同源裁判等于开卷考试，成绩会虚高，这叫主场优势。结果文件里把它们写作 ACT-R 真值和 HLR 真值。</dd>
+    <dt>调度算法</dt><dd>替学生排复习日程的程序：今天复习哪些词，每个词下次隔几天。FSRS 和我们的模型都是调度算法。</dd>
+    <dt>我们的模型</dt><dd>正文里的简称，指带反应时的 HLR。「排复习换回 FSRS」就是不再用它排日程，改用 FSRS。</dd>
   </dl>
 
   <h3>名词：产品规则</h3>
@@ -736,7 +914,7 @@ footer{margin-top:60px;color:var(--ink-3);font-size:13px;border-top:1px solid va
 </section>
 
 <footer>
-  词猎 Demo 阶段报告 · 2026-11-09 初版，2026-11-10 补入第四到六轮 · 数字均为六种学生、五个种子、90 天的平均值，「显著」指 bootstrap 95% 置信区间不含 0。
+  词猎 Demo 阶段报告 · 2026-11-09 初版，2026-11-10 补入第四到六轮并按读者视角改写 · 数字都是 30 个假学生学 90 天的平均。
 </footer>
 
 </div>
